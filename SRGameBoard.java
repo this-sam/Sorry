@@ -45,7 +45,7 @@ public class SRGameBoard {
 	
 	//card methods:
 	public SRCard drawCard(){
-		return new SRCard();
+		return new SRCard(1);
 	}
 	
 	//movement methods:
