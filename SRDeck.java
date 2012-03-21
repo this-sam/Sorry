@@ -19,7 +19,7 @@ public class SRDeck {
 	//Adds new cards to the drawPile
 	
 	public SRDeck() {
-		drawPile = new drawPile<SRCard>(45);
+		drawPile = new ArrayList<SRCard>(45);
 		for(int i = 0; i<4; i++) {
 			drawPile.add(new SRCard(1));
 		}for(int i = 0; i<3; i++) {
@@ -69,18 +69,20 @@ public class SRDeck {
 	//Will take the card drawn from the drawPile and put it 
 	//into the discardPile
 	
-	public SRCard discardPile() {
-		discardPile = new discardPile<SRCard>(45);
+	public SRCard discardPile(SRCard drawCard) {
+		discardPile = new ArrayList<SRCard>(45);
 		discardPile.add(drawCard);
+		return drawCard;
 	}
 	
 	//Check to see if drawPile is empty
 	//If so, will return true and will implement the shuffle function
-	
+	/*
 	public boolean isEmpty() {
 		if (drawPile.size() = 0) {
 		return true;
 		}
 		else return false;
 	}
+	*/
 }

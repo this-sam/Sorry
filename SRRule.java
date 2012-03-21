@@ -5,7 +5,7 @@ public class SRRule {
 	public SRRule() {
 	numMoves = 0;
 	}
-	
+/*
 	public 
 	
 	numMoves == cardNum;
@@ -27,4 +27,6 @@ public class SRRule {
 	else if (type == swap)
 		//set player x's pawn = track index of player y's pawn
 		//set player y's pawn = old track index of player x's pawn
+
+*/
 }
