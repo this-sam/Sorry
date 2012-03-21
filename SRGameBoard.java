@@ -6,6 +6,7 @@
 	 */
 
 import java.util.Date; //for gameplay length
+import java.util.Random;
 
 
 /**
@@ -18,6 +19,8 @@ import java.util.Date; //for gameplay length
  * @author Sam Brown, Caleb Cousins, Taylor Krammen, and Yucan Zhang
  */
 public class SRGameBoard {
+	//debug
+	private static boolean debug = true;
 	
 	//constants
 	public static int trackLength = 60;
@@ -82,7 +85,12 @@ public class SRGameBoard {
 		this.cpuStyle = "easy";
 		this.startTime = new Date();
 		
-		System.out.println("GameBoard initialized.");//for testing
+		
+		//testing:
+		if (this.debug){
+			System.out.println("GameBoard initialized.");//for testing
+		}
+		
 	}
 	
 	//card methods:
@@ -97,6 +105,26 @@ public class SRGameBoard {
 		return null;
 	}
 
+	/** 
+	 * This function handles the actual movement of the pawn, and the resultant bumping
+	 * and sliding that may occur. If a pawn is moved to a space with another pawn, the
+	 * second pawn will be moved back to Start. If the pawn is moved to a space with a
+	 * slide, the pawn will be moved a second time the distance of the slide.
+	 * 
+	 * Assumes the pawn is on the normal track.
+	 * 
+	 * @param pawn
+	 * @param card
+	 * @return
+	 */
+	public void movePawnTo(SRPawn pawn, int location){
+		//make sure they don't go off the board.
+		location %=this.trackLength;
+		
+		this.movePawnTo(pawn, location, false);
+
+	}
+	
 	/**
 	 * This function handles the actual movement of the pawn, and the resultant bumping
 	 * and sliding that may occur. If a pawn is moved to a space with another pawn, the
@@ -107,15 +135,61 @@ public class SRGameBoard {
 	 * @param card
 	 * @return
 	 */
-	public void movePawn(SRPawn pawn, int location){
-		for (int i=0;i<this.pawns.length; i++){
-			if (pawns[i].getTrackIndex() == location){
-				pawns[i].bump();
-			}
+	public void movePawnTo(SRPawn pawn, int location, boolean isSafety){
+		if (this.debug && isSafety){
+			System.out.println("Moved player"+ pawn.player+" pawn4 "+(location-pawn.getTrackIndex())+
+					           " squares from "+pawn.trackIndex+" to "+location+".");
+		}
+		if (isSafety){
+			//make sure they don't go off the board.
+			if (location > this.track.length)
+				location = location%this.track.length;
 		}
 		
+		//bump (only bump the pawns of the opposing player)
+		for (int i=pawn.player;i<this.pawns.length; i++){
+			boolean sameSquare = pawns[i].getTrackIndex() == location;
+			//bump the opponent
+			if (sameSquare && pawn.player != pawns[i].player){
+				pawns[i].bump();
+				if (this.debug){
+					System.out.println("Bump!");
+				}
+			}
+			//but don't move if you'll land on yourself
+			else if (sameSquare){
+				location = pawn.trackIndex;
+			}
+		}
+
 		//move the pawn and slide too if we need it.
-		pawn.setTrackIndex(location+this.track[location].getSlideLength());
+		pawn.setTrackIndex(location);
+	}
+	
+	/**
+	 * Determines the location that the move will take the pawn to, and calls
+	 * the movePawnTo function.
+	 * 
+	 * @param pawn
+	 * @param card
+	 * @return
+	 */
+	public void movePawn(SRPawn pawn, int distance){		
+		//move the pawn and slide too if we need it.
+		this.movePawnTo(pawn, pawn.getTrackIndex()+distance);
+	}
+	
+	/**
+	 * Determines the location that the move will take the pawn to, and calls
+	 * the movePawnTo function.
+	 * 
+	 * @param pawn
+	 * @param card
+	 * @return
+	 */
+	public void movePawn(SRPawn pawn, int distance, boolean isSafety){		
+		//move the pawn and slide too if we need it.
+		this.movePawnTo(pawn, pawn.getTrackIndex()+distance, isSafety);
 	}
 	
 	public void bumpPawn(SRPawn pawn){
@@ -138,5 +212,17 @@ public class SRGameBoard {
 	
 	public static void main(String[] args){
 		SRGameBoard gb = new SRGameBoard();
+		Random rand = new Random();
+		//simulate a bunch of random moves
+		for (int i=0;i<1000;i++){
+			boolean special = false;
+			for (int j=0;j<8;j++){
+				if (j==7){
+					special=true;
+				}
+				gb.movePawn(gb.pawns[j], rand.nextInt(12), special);
+			}
+		}
+			
 	}
 }
