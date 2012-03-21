@@ -6,12 +6,13 @@ public class SRPawn {
 	public int safetyIndex;
 	public int player;
 	
+	//chain the constructors
+	public SRPawn(int player){
+		this(true, false, player);
+	}
+	
 	public SRPawn(boolean onStart, boolean onHome, int player) {
-		this.onStart = onStart;
-		this.onHome = onHome;
-		trackIndex = -1;
-		safetyIndex = -1;
-		this.player = player;
+		this(onStart, onHome, player, -1, -1);
 	}
 	
 	public SRPawn(boolean onStart, boolean onHome, int player, int trackIndex, int safetyIndex) {
@@ -22,6 +23,7 @@ public class SRPawn {
 		this.safetyIndex = safetyIndex;
 		this.player = player;
 	}
+	
 	
 	public boolean isOnStart() {
 		return onStart;
@@ -58,9 +60,27 @@ public class SRPawn {
 	
 	public void setOnStart(boolean onStart) {
 		this.onStart = onStart;
+		this.onHome = false;
+		this.trackIndex = -1;
 	}
 	
 	public void setOnHome(boolean onHome) {
 		this.onHome = onHome;
+		this.onStart = false;
+		this.trackIndex = -1;
+	}
+
+	public void setTrackIndex(int index) {
+		this.trackIndex = index;
+		this.onHome = false;
+		this.onStart = false;
+	}
+
+	public int getTrackIndex() {
+		return this.trackIndex;
+	}
+
+	public void bump() {
+		this.setOnHome(true);
 	}
 }
