@@ -118,9 +118,6 @@ public class SRGameBoard {
 	 * @return
 	 */
 	public void movePawnTo(SRPawn pawn, int location){
-		//make sure they don't go off the board.
-		location %=this.trackLength;
-		
 		this.movePawnTo(pawn, location, false);
 
 	}
@@ -136,14 +133,17 @@ public class SRGameBoard {
 	 * @return
 	 */
 	public void movePawnTo(SRPawn pawn, int location, boolean isSafety){
-		if (this.debug && isSafety){
+		if (this.debug){
 			System.out.println("Moved player"+ pawn.player+" pawn4 "+(location-pawn.getTrackIndex())+
 					           " squares from "+pawn.trackIndex+" to "+location+".");
 		}
+		//make sure they don't go off the board.
 		if (isSafety){
-			//make sure they don't go off the board.
 			if (location > this.track.length)
 				location = location%this.track.length;
+		}
+		else{
+			location %=SRGameBoard.trackLength;
 		}
 		
 		//bump (only bump the pawns of the opposing player)
