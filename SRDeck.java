@@ -77,12 +77,11 @@ public class SRDeck {
 	
 	//Check to see if drawPile is empty
 	//If so, will return true and will implement the shuffle function
-	/*
+	
 	public boolean isEmpty() {
-		if (drawPile.size() = 0) {
+		if (drawPile.isEmpty()) {
 		return true;
 		}
 		else return false;
 	}
-	*/
 }
