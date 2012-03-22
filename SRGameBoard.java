@@ -100,7 +100,16 @@ public class SRGameBoard {
 	
 	//movement methods:
 	
-
+	/**
+	 * This function uses the Pawn object’s current location, as well as the Rules associated
+	 * with the Card to determine where on the board the Pawn may move to. These
+	 * locations on the board are returned as an array of integers, representing indices
+	 * into the GameBoard.track object.
+	 * 
+	 * @param pawn
+	 * @param card
+	 * @return
+	 */
 	public int[] findMoves(SRPawn pawn, SRCard card){
 		return null;
 	}
@@ -192,18 +201,48 @@ public class SRGameBoard {
 		this.movePawnTo(pawn, pawn.getTrackIndex()+distance, isSafety);
 	}
 	
+	/**
+	 * This function moves Pawn pawn back onto its start square.
+	 * 
+	 * @param pawn
+	 */
 	public void bumpPawn(SRPawn pawn){
-		pawn.setOnHome(true);
+		this.movePawnTo(pawn, this.startIndex[pawn.player]);
 	}
 	
+	/**
+	 * This function moves Pawn pawn from its start square onto the square directly
+	 * adjacent to the start square.
+	 * 
+	 * @param pawn
+	 */
 	public void startPawn(SRPawn pawn){
-		pawn.setOnStart(true);
+		this.movePawnTo(pawn, this.startIndex[pawn.player]);
 	}
 	
+	/**
+	 * This function checks to see whether a player has managed to place all 4 of his/her
+	 * pawns on his/her start square and returns True if this is the case. Otherwise it
+	 * returns False.
+	 * 
+	 * @param player
+	 * @return
+	 */
 	public boolean hasWon(int player){
-		return false;
+		int playerPawnIndex = player*4; //0 if player 0, 4 if player 1
+		
+		//loop through pawns, if any not on home the player hasn't won.
+		for (int i=playerPawnIndex; i<playerPawnIndex+4; i++){
+			if (this.pawns[i].onHome == false){
+				return false;
+			}
+		}
+		return true;
 	}
 	
+	/**
+	 * Performs after-game clean up and statistics prep.
+	 */
 	private void endGame(){
 		Date endTime = new Date();
 		//something like:
