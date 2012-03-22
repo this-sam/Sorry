@@ -19,6 +19,7 @@ public class SRDeck {
 	//Adds new cards to the drawPile
 	
 	public SRDeck() {
+        //initialize the list of cards
 		drawPile = new ArrayList<SRCard>(45);
 		for(int i = 0; i<4; i++) {
 			drawPile.add(new SRCard(1));
