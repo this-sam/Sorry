@@ -5,6 +5,7 @@ public class SRPawn {
 	public int trackIndex;
 	public int safetyIndex;
 	public int player;
+	public int id;
 	
 	//chain the constructors
 	public SRPawn(int player){
@@ -82,5 +83,9 @@ public class SRPawn {
 
 	public void bump() {
 		this.setOnHome(true);
+	}
+
+	public void setID(int i) {
+		this.id = i;
 	}
 }

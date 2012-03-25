@@ -6,7 +6,6 @@
 	 */
 
 import java.util.Date; //for gameplay length
-import java.util.Random;
 
 
 /**
@@ -57,10 +56,10 @@ public class SRGameBoard {
 			//make 'em
 			track[i] = new SRSquare();
 			//check if this one is slippery
-			for (int j=0; j<this.slideIndex.length; j++){
+			for (int j=0; j<SRGameBoard.slideIndex.length; j++){
 				//take appropriate action if it is
 				if (i == j){
-					track[j].slideLength = this.slideLength;
+					track[j].slideLength = SRGameBoard.slideLength;
 				}
 			}
 		}
@@ -80,6 +79,7 @@ public class SRGameBoard {
 				this.pawns[i] = new SRPawn(0);
 			else
 				this.pawns[i] = new SRPawn(1);
+			this.pawns[i].setID(i);
 		}
 		
 		this.cpuStyle = "easy";
@@ -87,7 +87,7 @@ public class SRGameBoard {
 		
 		
 		//testing:
-		if (this.debug){
+		if (SRGameBoard.debug){
 			System.out.println("GameBoard initialized.");//for testing
 		}
 		
@@ -142,7 +142,7 @@ public class SRGameBoard {
 	 * @return
 	 */
 	public void movePawnTo(SRPawn pawn, int location, boolean isSafety){
-		if (this.debug){
+		if (SRGameBoard.debug){
 			System.out.println("Moved player"+ pawn.player+" pawn4 "+(location-pawn.getTrackIndex())+
 					           " squares from "+pawn.trackIndex+" to "+location+".");
 		}
@@ -161,7 +161,7 @@ public class SRGameBoard {
 			//bump the opponent
 			if (sameSquare && pawn.player != pawns[i].player){
 				pawns[i].bump();
-				if (this.debug){
+				if (SRGameBoard.debug){
 					System.out.println("Bump!");
 				}
 			}
@@ -207,7 +207,7 @@ public class SRGameBoard {
 	 * @param pawn
 	 */
 	public void bumpPawn(SRPawn pawn){
-		this.movePawnTo(pawn, this.startIndex[pawn.player]);
+		this.movePawnTo(pawn, SRGameBoard.startIndex[pawn.player]);
 	}
 	
 	/**
@@ -217,7 +217,7 @@ public class SRGameBoard {
 	 * @param pawn
 	 */
 	public void startPawn(SRPawn pawn){
-		this.movePawnTo(pawn, this.startIndex[pawn.player]);
+		this.movePawnTo(pawn, SRGameBoard.startIndex[pawn.player]);
 	}
 	
 	/**
@@ -247,21 +247,5 @@ public class SRGameBoard {
 		Date endTime = new Date();
 		//something like:
 		//elapsedTime = endTime - this.startTime
-	}
-	
-	public static void main(String[] args){
-		SRGameBoard gb = new SRGameBoard();
-		Random rand = new Random();
-		//simulate a bunch of random moves
-		for (int i=0;i<1000;i++){
-			boolean special = false;
-			for (int j=0;j<8;j++){
-				if (j==7){
-					special=true;
-				}
-				gb.movePawn(gb.pawns[j], rand.nextInt(12), special);
-			}
-		}
-			
 	}
 }
