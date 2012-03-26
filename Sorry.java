@@ -13,17 +13,28 @@ public class Sorry {
 	 */
 	public static void main(String[] args){
 		//first we need a game board
-		SRGameBoard gb = new SRGameBoard();
+		SRGameBoard board = new SRGameBoard();
 		Random rand = new Random();
+		int dist = 0;
+		SRCard card = new SRCard(dist);
+		int [] moves;
+		
 		//simulate a bunch of random moves
 		for (int i=0;i<1000;i++){
-			boolean special = false;
-			for (int j=0;j<8;j++){
-				if (j==7){
-					special=true;
-				}
-				gb.movePawn(gb.pawns[j], rand.nextInt(12), special);
+			for (int j=0;j<2;j++){
+				int player = j;
+				int pawnID = rand.nextInt(4);
+				//moves = board.getMoves(pawn, distance)
+				//board.movePawnTo(pawn, moves[random choice of move])
+				dist = rand.nextInt(12);
+				
+				moves = board.findMoves(board.getPlayerPawn(player, pawnID), card);
+				/*for (int m=0;m<moves.length;m++){
+					System.out.print(moves[m]+" ");
+				}*/
+				//System.out.println();
+				board.movePawn(board.getPlayerPawn(player, pawnID), dist);
 			}
 		}
-	}
+	}	
 }

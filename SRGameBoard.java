@@ -22,17 +22,18 @@ public class SRGameBoard {
 	private static boolean debug = true;
 	
 	//constants
-	public static int trackLength = 60;
-	public static int[] safetyZoneIndex = {60,66};
-	public static int[] safetyZoneEntrance = {2, 33};
-	public static int[] startIndex = {4,37};
-	public static int slideLength = 4;
-	public static int[] slideIndex = {1,9, 16, 24, 31, 39, 46, 54}; 
+	public static final int trackLength = 56;
+	public static final int safetyLength = 5;
+	public static final int[] safetyZoneIndex = {60,66};
+	public static final int[] safetyZoneEntrance = {2, 29};
+	public static final int[] startIndex = {4,32};
+	public static final int slideLength = 4;
+	public static final int[] slideIndex = {1,9, 15, 23, 29, 37, 43, 51}; 
 	
 	
 	
 	//gameplay	
-	public SRSquare[] track = new SRSquare[72];	//squares that make up the regular track, safety zones, and home squares
+	public SRSquare[] track = new SRSquare[66];	//squares that make up the regular track, safety zones, and home squares
 	public SRSquare[] startSquares  = new SRSquare[2];	//indexes into the track representing where players may move their pawns into play
 	public SRDeck deck;	//Deck object used in this game
 	public SRPawn[] pawns  = new SRPawn[8];	//8 pawns used in the game
@@ -79,7 +80,7 @@ public class SRGameBoard {
 				this.pawns[i] = new SRPawn(0);
 			else
 				this.pawns[i] = new SRPawn(1);
-			this.pawns[i].setID(i);
+			this.pawns[i].setID(i%4);
 		}
 		
 		this.cpuStyle = "easy";
@@ -92,6 +93,20 @@ public class SRGameBoard {
 		}
 		
 	}
+	//getters
+	public SRPawn getPlayerPawn(int player, int number){
+		return this.pawns[(player*4+number)];
+	}
+	
+	public SRSquare getSquareAt(int index){
+		if (index < this.track.length){
+			return this.track[index];
+		}
+		else{
+			return new SRSquare(-1, -1, false);
+		}
+	}
+	
 	
 	//card methods:
 	public SRCard drawCard(){
@@ -99,7 +114,6 @@ public class SRGameBoard {
 	}
 	
 	//movement methods:
-	
 	/**
 	 * This function uses the Pawn object’s current location, as well as the Rules associated
 	 * with the Card to determine where on the board the Pawn may move to. These
@@ -111,10 +125,45 @@ public class SRGameBoard {
 	 * @return
 	 */
 	public int[] findMoves(SRPawn pawn, SRCard card){
-		return null;
+		int numMoves = card.getcardNum();
+		
+		int [] locations = new int [numMoves]; //for now traeat card number like number of moves
+		int playerEntrance = SRGameBoard.safetyZoneEntrance[pawn.getPlayer()];
+		
+		
+		//if this pawn is moving from the normal board:
+		
+			
+			//check if it won't pass a safety zone first (bigger case)
+			boolean willPassSafety = (pawn.trackIndex < SRGameBoard.trackLength && 
+					  				  pawn.getTrackIndex() <= playerEntrance && 
+					                  playerEntrance < playerEntrance+6);             
+			if (!willPassSafety){
+				for (int i=0; i<numMoves; i++){
+					locations[i] = pawn.trackIndex+i+1;
+				}
+				return locations;
+			}
+			else{
+				int [] returns = {pawn.trackIndex};
+				return returns;
+			}
+		
+		//LOGIC SHOULD ALL BE WITHIN GET MOVES AND RETURN ABSOLUTE INTS --> WAAAAY EASIER
+		//moving inside safety zone
+		//if (pawn.safetyIndex >= 0){
+			//if positive
+			//if negative
+		//}
+		//moving into safety zone
+		//else{
+			//if positive
+			//if negative
+		//}
+		
 	}
 
-	/** 
+	/* 
 	 * This function handles the actual movement of the pawn, and the resultant bumping
 	 * and sliding that may occur. If a pawn is moved to a space with another pawn, the
 	 * second pawn will be moved back to Start. If the pawn is moved to a space with a
@@ -125,11 +174,13 @@ public class SRGameBoard {
 	 * @param pawn
 	 * @param card
 	 * @return
-	 */
+	
 	public void movePawnTo(SRPawn pawn, int location){
 		this.movePawnTo(pawn, location, false);
 
-	}
+	} 
+	Don't think isSafety is necessary.  -SB
+	*/
 	
 	/**
 	 * This function handles the actual movement of the pawn, and the resultant bumping
@@ -137,22 +188,35 @@ public class SRGameBoard {
 	 * second pawn will be moved back to Start. If the pawn is moved to a space with a
 	 * slide, the pawn will be moved a second time the distance of the slide.
 	 * 
+	 * Return a boolean true if move successful or false otherwise.
+	 * 
 	 * @param pawn
 	 * @param card
-	 * @return
+	 * @return boolean
 	 */
-	public void movePawnTo(SRPawn pawn, int location, boolean isSafety){
-		if (SRGameBoard.debug){
-			System.out.println("Moved player"+ pawn.player+" pawn4 "+(location-pawn.getTrackIndex())+
-					           " squares from "+pawn.trackIndex+" to "+location+".");
+	public boolean movePawnTo(SRPawn pawn, int location){
+		//int location = (pawn.getTrackIndex()+distance)%SRGameBoard.trackLength;
+		//check for starting pawns
+		if (location >= 0 && location < this.track.length){
+			location += this.track[location].getSlideLength();
 		}
-		//make sure they don't go off the board.
-		if (isSafety){
-			if (location > this.track.length)
-				location = location%this.track.length;
+		//check for pawns going to start
+		else if (location < 0){
+			pawn.setOnStart(true);
+			return true;
 		}
-		else{
-			location %=SRGameBoard.trackLength;
+		//check for pawns going out of bounds
+		else if (location > SRGameBoard.trackLength){
+			return false;
+		}
+		//check for pawns that are going home
+		else if (this.track[location].isHome){
+			pawn.setOnHome(true);
+			return true;
+		}
+		//check for pawns that are already home?  do we need to?  why not.
+		else if (pawn.isOnHome()){
+			return false;
 		}
 		
 		//bump (only bump the pawns of the opposing player)
@@ -162,17 +226,23 @@ public class SRGameBoard {
 			if (sameSquare && pawn.player != pawns[i].player){
 				pawns[i].bump();
 				if (SRGameBoard.debug){
-					System.out.println("Bump!");
+					System.out.print("Bumped a piece and ");
 				}
 			}
 			//but don't move if you'll land on yourself
 			else if (sameSquare){
-				location = pawn.trackIndex;
+				return false;
 			}
 		}
 
+		if (SRGameBoard.debug){
+			System.out.println("Moved player"+pawn.player+" pawn4 "+(location-pawn.getTrackIndex())+
+					           " squares from "+pawn.trackIndex+" to "+location+".");
+		}
+		
 		//move the pawn and slide too if we need it.
 		pawn.setTrackIndex(location);
+		return true;
 	}
 	
 	/**
@@ -182,24 +252,31 @@ public class SRGameBoard {
 	 * @param pawn
 	 * @param card
 	 * @return
+	 * 
 	 */
+	
 	public void movePawn(SRPawn pawn, int distance){		
-		//move the pawn and slide too if we need it.
-		this.movePawnTo(pawn, pawn.getTrackIndex()+distance);
-	}
+		int location = pawn.getTrackIndex()+distance;
+		this.movePawnTo(pawn, location);// isSafety);
+	} 
 	
-	/**
+	
+	/*
 	 * Determines the location that the move will take the pawn to, and calls
 	 * the movePawnTo function.
 	 * 
 	 * @param pawn
 	 * @param card
+	 * @param isSafety
 	 * @return
-	 */
-	public void movePawn(SRPawn pawn, int distance, boolean isSafety){		
-		//move the pawn and slide too if we need it.
-		this.movePawnTo(pawn, pawn.getTrackIndex()+distance, isSafety);
+	 
+	public void movePawn(SRPawn pawn, int distance, boolean isSafety){	
+		int location = pawn.getTrackIndex()+distance;
+		this.movePawnTo(pawn, location); isSafety);
+		
 	}
+	Don't think isSafety is necessary.  -SB
+	*/
 	
 	/**
 	 * This function moves Pawn pawn back onto its start square.
