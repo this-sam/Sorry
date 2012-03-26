@@ -19,7 +19,7 @@ public class Sorry {
 		SRCard card = new SRCard(dist);
 		int [] moves;
 		
-		//simulate a bunch of random moves
+		//simulate a bunch of random turns
 		for (int i=0;i<1000;i++){
 			for (int j=0;j<2;j++){
 				int player = j;
