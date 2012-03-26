@@ -1,32 +1,51 @@
+/*-----------------------------------------
+Programmer: Taylor Krammen
+Class: CS 205 Software Engineering
+Project: Sorry! Boardgame Implementation
+-------------------------------------------*/
+
+/*
+This class will implement rules and actions for 
+each of the cards to be used in the Sorry! game.
+*/
+
 public class SRRule {
 	
-	public int numMoves;
+	public int numMoves; //Initialize numMoves
 	
-	public SRRule() {
-	numMoves = 0;
+	//Will create and return the number of moves and the type of
+	//rule associated with each card.
+	
+	public String[] types(int cardNum,String type) {
+		numMoves = 0;
+		if (type == "move") {
+			numMoves = cardNum;
+			String[] rule = {""+numMoves,"move"};
+			return rule;
+		}else if (type == "start") {
+			numMoves = cardNum;
+			String[] rule = {""+numMoves,"start"};
+			return rule;
+		}else if (type == "split") {
+			numMoves = cardNum;
+			String[] rule = {""+numMoves,"split"};
+			return rule;
+		}else if (type == "swap") {
+			numMoves = cardNum;
+			String[] rule = {""+numMoves,"swap"};
+			return rule;
+		}else if (type == "drawAgain") {
+			numMoves = cardNum;
+			String[] rule = {""+numMoves,"drawAgain"};
+			return rule;
+		}else if (type == "sorry") {
+			numMoves = cardNum;
+			String[] rule = {""+numMoves,"sorry"};
+			return rule;
+		}else {
+			String[] rule = {"",""};
+			return rule;
+		}
 	}
-/*
-	public 
-	
-	numMoves == cardNum;
-	
-	if (type == move)
-		//allow player to move cards value length from current position
-		//move = SRPawn.getPosition + cardNum
-	else if (type == sorry)
-		//set player x's pawn = track index of player y's pawn
-		//send player y's pawn back to start
-	else if (type == start)
-		//allow user to place on pawn on start
-		SRPawn.setOnStart();
-	else if (type == drawAgain)
-		//allow player to play this turn, and then get another turn
-		SRCard.drawCard();
-	else if (type == split)
-		//allow user to split number of moves between two pawns
-	else if (type == swap)
-		//set player x's pawn = track index of player y's pawn
-		//set player y's pawn = old track index of player x's pawn
 
-*/
 }
