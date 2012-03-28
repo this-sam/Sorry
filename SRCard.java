@@ -14,8 +14,20 @@ from each card to the user.
 public class SRCard {
 
 	public int cardNum;
+	private String pictureName;
 	
 	public SRCard(int cardNum) {
+		this.cardNum = cardNum;
+		switch(cardNum) {
+			case 0:
+				pictureName = "cardSorry.jpg";
+				break;
+			default:
+				pictureName = "card" + cardNum + ".jpg";
+		}
+	}
+	
+	public void setcardNum(int cardNum) {
 		this.cardNum = cardNum;
 	}
 	
@@ -23,8 +35,19 @@ public class SRCard {
 		return cardNum;
 	}
 	
-	public void setcardNum(int cardNum) {
-		this.cardNum = cardNum;
+	public void setPictureName(String pictureName) {
+		this.pictureName = pictureName;
+	}
+	
+	public String getPictureName() {
+		return pictureName;
+	}
+	
+	public String toString() {
+		if(cardNum == 0)
+			return "Sorry!";
+		else 
+			return "" + cardNum;
 	}
 	
 	//Depending on what card is drawn, will return the
