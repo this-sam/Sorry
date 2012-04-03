@@ -51,6 +51,10 @@ public class SRPawn {
 		}
 	}
 	
+	public int getTrackIndex(){
+		return this.trackIndex;
+	}
+	
 	public int getPlayer() {
 		return player;
 	}
