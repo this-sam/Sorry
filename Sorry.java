@@ -28,7 +28,7 @@ public class Sorry {
 				//board.movePawnTo(pawn, moves[random choice of move])
 				dist = rand.nextInt(12);
 				
-				moves = board.findMoves(board.getPlayerPawn(player, pawnID), card);
+				//moves = board.findMoves(board.getPlayerPawn(player, pawnID), card);
 				/*for (int m=0;m<moves.length;m++){
 					System.out.print(moves[m]+" ");
 				}*/

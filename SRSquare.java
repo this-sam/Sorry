@@ -13,11 +13,13 @@ public class SRSquare {
 	public boolean isStart;
 
 	//default constructor
+	//constructors are chained (each calls next, setting default params as necessary
 	public SRSquare() {
-		slideLength = 0;
-		maxPawns = 1;
-		isHome = false;
-		isStart = false;
+		this(0, 1, false);
+	}
+	
+	public SRSquare(int slideLength, int maxPawns, boolean isHome) {
+		this(slideLength, maxPawns, isHome, false);
 	}
 	
 	public SRSquare(int slideLength, int maxPawns, boolean isHome, boolean isStart) {
