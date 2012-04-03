@@ -1,30 +1,25 @@
-/*-----------------------------------------
-Programmer: Taylor Krammen
-Class: CS 205 Software Engineering
-Project: Sorry! Boardgame Implementation
--------------------------------------------*/
+import java.util.Arrays;
 
-/*
-This class will create the cards to be used in the game.
-Each card will inherit rules related to that particular 
-card from the SRRule class, it will also display the text
-from each card to the user.
+/**
+* This class will create the cards to be used in the game.  Each card will inherit 
+* rules related to that particular card from the SRRule class, it will also display 
+* the text from each card to the user.
+* 
+* @author Sam Brown, Caleb Cousins, Taylor Krammen, and Yucan Zhang
 */
 
 public class SRCard {
-
+	
+	//The following methods will set both the cardNum and the pictureName.
 	public int cardNum;
 	private String pictureName;
 	
 	public SRCard(int cardNum) {
 		this.cardNum = cardNum;
-		switch(cardNum) {
-			case 0:
-				pictureName = "cardSorry.jpg";
-				break;
-			default:
-				pictureName = "card" + cardNum + ".jpg";
-		}
+		if(cardNum == 0)
+			pictureName = "cardSorry.jpg";
+		else
+			pictureName = "card" + cardNum + ".jpg";
 	}
 	
 	public void setcardNum(int cardNum) {
@@ -43,6 +38,8 @@ public class SRCard {
 		return pictureName;
 	}
 	
+	//Will return a string representation of each card
+	//Will help when later reffering to pictures for each card in the GUI
 	public String toString() {
 		if(cardNum == 0)
 			return "Sorry!";
@@ -50,10 +47,13 @@ public class SRCard {
 			return "" + cardNum;
 	}
 	
-	//Depending on what card is drawn, will return the
-	//text associated with that card to be displayed
-	
-	public String getText(int cardNum) {
+	/**
+	 * This function will return the text build into each card
+	 * 
+	 * @param
+	 * @return string Text
+	 */
+	public String getText() {
 		if (cardNum == 1)
 			return "You drew a 1, you may now move a pawn from Start or move a pawn 1 space forward.";
 		else if (cardNum == 2)
@@ -72,44 +72,30 @@ public class SRCard {
 			return "You drew a " + cardNum + ", you may now move a pawn " + cardNum + " spaces forward.";
 	}	
 	
-	//Depending on what card is drawn, will limit the available 
-	//actions in the game as to correspond with that card
-
-	public SRRule getRules(int cardNum) {
-		if (cardNum == 1) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"start");
-			return rules;
-		}else if (cardNum == 2) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"start");
-			return rules;
-		}else if (cardNum == 4) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"move");
-			return rules;
-		}else if (cardNum == 7) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"split");
-			return rules;
-		}else if (cardNum == 10) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"move");
-			return rules;
-		}else if (cardNum == 11) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"swap");
-			return rules;
-		}else if (cardNum == 0) {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"sorry");
-			return rules;
-		}else {
-			SRRule rules = new SRRule();
-			rules.types(cardNum,"move");
-			return rules;
-		}
-
+	/**
+	 * Take the rules associated with the card drawn and will display
+	 * the game-play choices to the user.
+	 * 
+	 * @param
+	 * @return Rule rule
+	 */
+	 public String[] getRules() {
+		SRRule rules = new SRRule();
+		String[] cardRule = rules.types(cardNum);
+		return cardRule;
 	}
-
+	/*
+	//Test function
+	public static void main(String[] args){
+		SRRule rule = new SRRule();
+		//Simple loop to create each of the 13 different cards
+		for(int i=0;i<13;i++){
+			SRCard card = new SRCard(i);
+			System.out.println(card); //Tests the toString function
+			System.out.println(card.getText()); //Tests the getText function
+			System.out.println(Arrays.toString(card.getRules())); //Tests the getRules function
+		}
+	}
+	*/
+	 
 }
