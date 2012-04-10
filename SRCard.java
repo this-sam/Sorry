@@ -13,6 +13,9 @@ public class SRCard {
 	//The following methods will set both the cardNum and the pictureName.
 	public int cardNum;
 	private String pictureName;
+	boolean canSplitMoves;
+	boolean canStartPawn;
+	boolean isSorry;
 	
 	public SRCard(int cardNum) {
 		this.cardNum = cardNum;
@@ -28,6 +31,18 @@ public class SRCard {
 	
 	public int getcardNum() {
 		return cardNum;
+	}
+	
+	public boolean canSplitMoves(){
+		return this.canSplitMoves;
+	}
+	
+	public boolean canStartPawn(){
+		return this.canStartPawn;
+	}
+	
+	public boolean isSorry(){
+		return this.isSorry;
 	}
 	
 	public void setPictureName(String pictureName) {
