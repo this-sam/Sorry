@@ -125,20 +125,175 @@ public class SRGameBoard {
 	 * @return
 	 */
 	public int[] findMoves(SRPawn pawn, SRCard card){
-		int numMoves = card.getcardNum();
+		int numMoves = card.getcardNum();//change when card truly has "rules"
 		int [] moveIndices;
 		boolean canSplit = card.canSplitMoves();
-		boolean isSafety = pawn.safetyIndex >= 0;
-		int [] noMoves = new int[pawn.trackIndex];	//just a dummy
-		int indiceCount = 0;  //So count how many locations we're allowed to enter, so we can trim later.
+		
 		
 		//figure out the direction of the pawn beforehand so we only need one loop (handles
 		//both - and + move directions.)
+		int step =  getStep(numMoves);
+		
+		//test for "special case" type moves
+		moveIndices = getSpecialMoves(pawn, card);
+		if (moveIndices.length > 0){
+			return moveIndices;
+		}
+		
+		int currIndex = pawn.getTrackIndex();
+		
+		//make room for indices
+		int [] regIndices = new int [numMoves*step];
+		int regIndicesCount = 0;
+		int [] safetyIndices = new int [numMoves*step];
+		int safetyIndicesCount = 0;
+		
+		//IF the pawn is on the regular track:
+		if (currIndex < SRGameBoard.trackLength){
+			regIndices = this.getNormalMoves(pawn.player, pawn.trackIndex, numMoves);
+			regIndicesCount = regIndices.length;
+			//if movement wasn't negative, maybe there was an opportunity to enter the safety zone!
+			if (step>0){
+				//System.out.println("And that is greater than zero...");
+				int numMovesLeft = 0; //number of moves left to make inside safety zone
+				boolean canEnterSafety = false;
+				for (int i=0; i<regIndices.length; i++){
+					if (regIndices[i] == SRGameBoard.safetyZoneEntrance[pawn.player]){
+						canEnterSafety = true;
+						numMovesLeft = numMoves-(i+1);
+					}
+				}
+				if (canEnterSafety){
+					//System.out.println("Can enter safety!");
+					int firstSafetyIndex = SRGameBoard.safetyZoneIndex[pawn.player];
+					safetyIndices = this.getSafetyMoves(pawn.player, firstSafetyIndex, numMovesLeft);
+					safetyIndicesCount = safetyIndices.length;
+					//determine whether the safety moves were valid
+					//set the count of safetyIndices appropriately
+					if ((numMovesLeft != safetyIndices.length) && (!canSplit)){
+						safetyIndicesCount = 0;
+					}
+				}//end if(canEnterSafety)
+			}
+		}
+		else{
+			safetyIndices = this.getSafetyMoves(pawn.player, pawn.trackIndex, numMoves);
+			safetyIndicesCount = safetyIndices.length;
+//			if (SRGameBoard.debug){
+//				for (int i=0; i<safetyIndices.length; i++){
+//					System.out.println("Safety indices: "+safetyIndices[i]);
+//				}
+//			}
+
+			if (step > 0 && safetyIndices.length < numMoves*step && !canSplit){
+				safetyIndicesCount = 0;
+			}
+			else if (step < 0){
+				int numMovesLeft = (numMoves*step - safetyIndices.length)*step;
+				regIndices = getNormalMoves(pawn.player, SRGameBoard.safetyZoneEntrance[pawn.player], numMovesLeft);
+				regIndicesCount = regIndices.length;
+			}
+		}
+		
+		if (regIndicesCount== 0){
+			regIndices = new int [0];
+		}
+		if (safetyIndicesCount == 0){
+			safetyIndices = new int [0];
+		}
+		return cleanUpMoveArrays(regIndices, safetyIndices, canSplit);
+	}
+	
+	/**
+	 * cleanUpMoveArrays takes the array of safety moves and the array
+	 * of regular board moves and 
+	 * @param regIndices
+	 * @param safetyIndices
+	 * @param canSplit
+	 * @return
+	 */
+	private int[] cleanUpMoveArrays(int[] regIndices, int[] safetyIndices,
+		boolean canSplit) {
+		int regIndicesCount;
+		int safetyIndicesCount;
+		int [] moveIndices;
+		safetyIndicesCount = safetyIndices.length;
+		regIndicesCount = regIndices.length;
+		
+		//now set up array depending on if the pawn can split its moves or not
+		//can't split is only 2 long (could go safety, could not)
+		if (!canSplit){
+			moveIndices = new int [2]; //only 2 potential places to move if the card doesn't allow 
+											  //splitting
+		}
+		//if pawn can split its moves, we need way more space!
+		else{
+			moveIndices = new int [regIndices.length+safetyIndices.length]; //for now treat card number like number of moves
+								  //Worst case for length of list is numMoves*2, so this is the maximum 
+								  //length of the array.
+		}
+		
+		int indiceCount = 0;  //So count how many locations we're allowed to enter, so we can trim later.
+		//clean up arrays at the end based on how we can split our moves
+		if (canSplit){
+			for (int i = 0; i < regIndicesCount+safetyIndicesCount; i++){
+				if (i<regIndicesCount){
+					moveIndices[i] = regIndices[i];
+					indiceCount++;
+				}
+				else{
+					moveIndices[i] = safetyIndices[i-regIndicesCount];
+					indiceCount++;
+				}
+			}
+		}
+		else{
+			if (regIndicesCount > 0){
+				moveIndices[0] = regIndices[regIndices.length-1];
+				indiceCount++;
+			}
+			if (safetyIndicesCount >0 && regIndicesCount > 0 && indiceCount>0){
+				moveIndices[1] = safetyIndices[safetyIndices.length-1];
+				indiceCount++;
+			}
+			else if (safetyIndicesCount > 0){
+				moveIndices[0] = safetyIndices[safetyIndices.length-1];
+				indiceCount++;
+			}
+		}
+		
+		//output for debugging
+		if (SRGameBoard.debug){
+			for (int i=0; i<indiceCount; i++){
+				System.out.println("MoveIndices: " + moveIndices[i]);
+			}
+		}
+		return this.trimArray(moveIndices, indiceCount);
+	}
+	
+	/**
+	 * cleanMoveArray -- "cleans up" the array of movements 
+	 */
+	
+	/**
+	 * Calculate the direction of the move.
+	 * 
+	 * @param numMoves
+	 * @return
+	 */
+	private int getStep(int numMoves) {
 		int step = 1;
 		if (numMoves < 0){
 			step *= -1;
 		}
-		
+		return step;
+	}
+	
+	//gets all "special" moves for cards (ie. sorry!, all non-generic movement)
+	private int []  getSpecialMoves(SRPawn pawn, SRCard card) {
+		int[] moveIndices;
+		int indiceCount = 0;
+		int [] noMoves = new int[pawn.trackIndex];	//just a dummy
 		//special cases:
 		//pawn is on start and card lets it start
 		if (pawn.isOnStart() && card.canStartPawn()){
@@ -165,21 +320,17 @@ public class SRGameBoard {
 		//if pawn is on home
 		else if (pawn.isOnHome()){
 			return noMoves;
-		}		
+		}
+		return new int [0];
+	}
+	
+	
+	//determines where the pawn can move on the board
+	public int [] getNormalMoves(int player, int currIndex, int numMoves){
+		int step = getStep(numMoves);
+		int [] regIndices = new int [numMoves*step];
+		int regIndicesCount = 0;
 		
-		//now set up array depending on if the pawn can split its moves or not
-		//can't split is only 2 long (could go safety, could not)
-		if (!canSplit){
-			moveIndices = new int [2]; //only 2 potential places to move if the card doesn't allow 
-											  //splitting
-		}
-		//if pawn can split its moves, we need way more space!
-		else{
-			moveIndices = new int [numMoves*step*2]; //for now treat card number like number of moves
-								  //Worst case for length of list is numMoves*2, so this is the maximum 
-								  //length of the array.
-		}
-				
 		//assume forward motion
 		int max = numMoves;//currIndex + numMoves;
 		int min = 0;
@@ -196,120 +347,30 @@ public class SRGameBoard {
 			min++;
 		}
 		
-		int playerEntrance = SRGameBoard.safetyZoneEntrance[pawn.getPlayer()];
-		int currIndex = pawn.getTrackIndex();
-		
-		//make room for indices
-		int [] regIndices = new int [numMoves*step];
-		int regIndicesCount = 0;
-		int [] safetyIndices = new int [numMoves*step];
-		int safetyIndicesCount = 0;
-		
-		//IF the pawn is on the regular track:
-		if (currIndex < SRGameBoard.trackLength){
-			//first find all possible moves on the normal track
-			for (int i=min;i < max; i++){
-				regIndices[regIndicesCount] = (currIndex+(i))%SRGameBoard.trackLength;
-				
-				//modulo of negative numbers doesn't work how we want, so do it by hand.
-				if (regIndices[regIndicesCount]<0){
-					regIndices[regIndicesCount] = SRGameBoard.trackLength+regIndices[regIndicesCount];
-				}
-				regIndicesCount += 1;
-			}
-			regIndices = this.trimArray(regIndices, regIndicesCount);//trim the array
+		//first find all possible moves on the normal track
+		for (int i=min;i < max; i++){
+			regIndices[regIndicesCount] = (currIndex+(i))%SRGameBoard.trackLength;
 			
-			//if the movement was negative, the array is backwards, so straighten it out
-			if (step<0){
-				regIndices = reverseArray(regIndices);
+			//modulo of negative numbers doesn't work how we want, so do it by hand.
+			if (regIndices[regIndicesCount]<0){
+				regIndices[regIndicesCount] = SRGameBoard.trackLength+regIndices[regIndicesCount];
 			}
-			
-			//if movement wasn't negative, maybe there was an opportunity to enter the safety zone!
-			else{
-				int numMovesLeft = 0; //number of moves left to make inside safety zone
-				boolean canEnterSafety = false;
-				for (int i=0; i<regIndicesCount; i++){
-					if (regIndices[i] == this.safetyZoneEntrance[pawn.player]){
-						canEnterSafety = true;
-						numMovesLeft = numMoves-(i+1);
-					}
-				}
-				if (canEnterSafety){
-					int firstSafetyIndex = SRGameBoard.safetyZoneIndex[pawn.player];
-					safetyIndices = this.getSafetyIndices(pawn.player, firstSafetyIndex, numMovesLeft);
-					//determine whether the safety moves were valid
-					//set the count of safetyIndices appropriately
-					if ((numMovesLeft != safetyIndices.length) && (!canSplit)){
-						safetyIndicesCount = 0;
-					}
-					else{
-						safetyIndicesCount = safetyIndices.length;
-					}
-				}
-			}
+			regIndicesCount += 1;
 		}
-		else{
-			safetyIndices = this.getSafetyIndices(pawn.player, pawn.trackIndex, numMoves);
-			for (int i=0; i<safetyIndices.length; i++){
-				System.out.println("Safety indices: "+safetyIndices[i]);
-			}
-			safetyIndicesCount = safetyIndices.length;
-
-			if (step > 0 && safetyIndices.length < numMoves && !canSplit){
-				safetyIndicesCount = 0;
-			}
-			else if (step < 0){
-				//find regular game board spaces.
-			}
-				
+		regIndices = this.trimArray(regIndices, regIndicesCount);//trim the array
+		
+		//if the movement was negative, the array is backwards, so straighten it out
+		if (step<0){
+			regIndices = reverseArray(regIndices);
 		}
 		
-
-		
-		//clean up arrays at the end based on how we can split our moves
-		if (canSplit){
-			for (int i = 0; i < regIndicesCount+safetyIndicesCount; i++){
-				if (i<regIndicesCount){
-					moveIndices[i] = regIndices[i];
-					indiceCount++;
-				}
-				else{
-					moveIndices[i] = safetyIndices[i-regIndicesCount];
-					indiceCount++;
-				}
-			}
-		}
-		else{
-			if (regIndicesCount > 0){
-				moveIndices[0] = regIndices[regIndices.length-1];
-				indiceCount++;
-			}
-			if (safetyIndicesCount >0){
-				moveIndices[1] = safetyIndices[safetyIndices.length-1];
-				indiceCount++;
-			}
-		}
-		
-		//output for debugging
-		if (SRGameBoard.debug){
-			for (int i=0; i<indiceCount; i++){
-				System.out.println("MoveIndices: " + moveIndices[i]);
-			}
-		}
-		return this.trimArray(moveIndices, indiceCount);
-	}
-	
-	
-	//determines where the pawn can move on the board
-	public int [] getGameboardSpaces(int player, int currIndex, int numMoves){
-		return new int [0];
+		return trimArray(regIndices, regIndicesCount);
 	}
 	
 	//figures out where the pawn can move in the safetyZone
-	public int [] getSafetyIndices(int player, int currIndex, int numMoves){		
+	public int [] getSafetyMoves(int player, int currIndex, int numMoves){	
 		int safetyStart = SRGameBoard.safetyZoneIndex[player];
 		int safetyEnd = safetyStart + SRGameBoard.safetyLength;
-		
 		int min = 0;
 		int max = 0 + numMoves;
 		if (numMoves < 0){
@@ -317,10 +378,7 @@ public class SRGameBoard {
 			min = max;
 			max = temp;
 		}
-		int step = 1;
-		if (numMoves < 0){
-			step = -1;
-		}
+		int step = getStep(numMoves);
 		
 		int [] safetyIndices = new int [SRGameBoard.safetyLength];
 		int [] allIndices = new int [numMoves*step];
@@ -329,7 +387,7 @@ public class SRGameBoard {
 		
 		//first get all theoretical places the pawn can go
 		for (int i=min;i < max; i++){
-			nextIndex = (currIndex+(i));
+			nextIndex = (currIndex+(i+1));
 			allIndices[indiceCount] = nextIndex;
 			indiceCount++;
 			//System.out.println("Next index: "+nextIndex);
@@ -345,6 +403,8 @@ public class SRGameBoard {
 				indiceCount++;
 			}
 		}
+
+		
 		return this.trimArray(safetyIndices, indiceCount); 
 	}
 	
@@ -514,19 +574,55 @@ public class SRGameBoard {
 	
 	public static void main(String [] args){
 		SRGameBoard gb = new SRGameBoard();
-		//start a pawn
+		
+		//test cases for SRGameBoard findMoves
+		//start a pawn on regular board to end on finish
 		SRPawn pawn = gb.pawns[0];
 		gb.movePawnTo(pawn,0);
 
-		
 		//now get its moves:
-		SRCard card = new SRCard(8);
-		card.canSplitMoves = true;
+		SRCard card = new SRCard(7);
+		card.canSplitMoves = false;
 		int [] moves = gb.findMoves(pawn, card);
+		System.out.println("================");
 		
-		/*for (int i=0; i<moves.length; i++){
-			System.out.println(moves[i]);
-		}*/
+		//start a pawn on safety to pass  finish
+		gb.movePawnTo(pawn,60);
+
+		//now get its moves:
+		card = new SRCard(14);
+		card.canSplitMoves = false;
+		moves = gb.findMoves(pawn, card);
+		System.out.println("================");
+		
+		//start a pawn on safety to hit finish
+		gb.movePawnTo(pawn,60);
+
+		//now get its moves:
+		card = new SRCard(4);
+		card.canSplitMoves = false;
+		moves = gb.findMoves(pawn, card);
+		System.out.println("================");
+		
+		//move a pawn backwards out of the safety zone
+		gb.movePawnTo(pawn,60);
+
+		//now get all its moves:
+		card = new SRCard(-14);
+		card.canSplitMoves = true;
+		moves = gb.findMoves(pawn, card);
+		System.out.println("================");
+		
+		//move a pawn onto a sliding square:
+		//move a pawn backwards out of the safety zone
+		gb.movePawnTo(pawn,0);
+
+		//now get its moves:
+		card = new SRCard(1);
+		card.canSplitMoves = false;
+		moves = gb.findMoves(pawn, card);
+		gb.movePawnTo(pawn, moves[0]);
+		System.out.println("================");
 		
 	}
 }
