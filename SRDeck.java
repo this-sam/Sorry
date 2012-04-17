@@ -51,13 +51,14 @@ public class SRDeck {
 	//This function will shuffle the discard pile into a random set of cards
 	public void shuffle() {
 		Random rand = new Random();
+		int j;
 		for (int i = 0; i < drawPile.size(); i++) {
-			int j = rand.nextInt(drawPile.size());
+			j = rand.nextInt(drawPile.size()-1);
 			SRCard temp = drawPile.get(i);
 			drawPile.set(i, drawPile.get(j));
 			drawPile.set(j, temp);			
 		}
-	}	
+	}
 	
 	//Will select the top card off of the drawPile and return it
 	public SRCard drawCard() {

@@ -11,6 +11,67 @@ public class SRRule {
 	
 	//Number of rules to be associated with given rule
 	public int numMoves; //Initialize numMoves
+	public int numTurns;
+	public boolean isSorry;
+	public boolean canStart;
+	public boolean canSplit;
+	public boolean shiftBackwards;
+	public boolean canSwitch;
+	
+	public SRRule(){
+		this.numMoves = 0;
+		this.numTurns = 1;
+		this.isSorry = false;
+		this.canStart = false;
+		this.canSplit = false;
+		this.shiftBackwards = false;
+		this.canSwitch = false;
+	}
+	
+	public SRRule(int numMoves){
+		this();
+		if (numMoves == 7){
+			this.canSplit = true;
+		}
+		else if (this.numMoves == 10){
+			this.shiftBackwards = true;
+			this.numMoves = 11;
+		}
+	}
+	public SRRule(String ruleStr){
+		this();
+		
+		if (ruleStr == "START"){
+			this.canStart = true;
+		}
+		else if (ruleStr == "SORRY"){
+			this.isSorry = true;
+		}
+		else if (ruleStr == "SWAP"){
+			this.canSwitch = true;
+		}
+		else if (ruleStr == "DRAW"){
+			this.numMoves = 2;
+		}
+		else{
+			throw new Error("Uh oh... looks like '"+ruleStr+"' is a new rule...");
+		}
+	}
+//	public SRRule(int numMoves){
+//		this.numMoves = numMoves;
+//		
+//		if (numMoves == 4){
+//			this.canSplit = true;
+//		}
+//		else{
+//			this.canSplit = false;
+//		}
+//		
+//		if (numMoves == 1 || numMoves == )
+//	}
+
+
+	
 	
 	/**
 	 * This function will create rules whose type will refer to the different 
@@ -56,16 +117,7 @@ public class SRRule {
 			return rule;
 		}
 	}
-	/*
-	//Test function
-	public static void main(String[] args){
-		SRRule rule = new SRRule();
-		//Simple loop to make sure each of the cards is covered
-		for(int i=0;i<13;i++){
-			rule.numMoves = i;
-			System.out.println(Arrays.toString(rule.types(rule.numMoves))); //Tests SRRule's types function
-		}
-	}
-	*/
+	 
+	
 	
 }

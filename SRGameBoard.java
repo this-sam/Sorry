@@ -6,7 +6,7 @@
 	 */
 
 import java.util.Date; //for gameplay length
-
+import java.util.Random;
 
 /**
  * This class will handle all logic involving the actions, and movements
@@ -50,7 +50,6 @@ public class SRGameBoard {
 	public int playerDistanceTraveled; //total number of squares traveled by the human player
 	public int cpuDistanceTraveled;	//"" "" "" "" computer
 	
-
 	public SRGameBoard(){
 		//start the track
 		for (int i=0;i<track.length;i++){
@@ -71,7 +70,8 @@ public class SRGameBoard {
 		}
 		
 		//shuffle the deck
-		//this.deck.shuffle();
+		this.deck = new SRDeck();
+		this.deck.shuffle();
 		
 		
 		//make some pawns
@@ -293,7 +293,8 @@ public class SRGameBoard {
 	private int []  getSpecialMoves(SRPawn pawn, SRCard card) {
 		int[] moveIndices;
 		int indiceCount = 0;
-		int [] noMoves = new int[pawn.trackIndex];	//just a dummy
+		int [] noMoves = new int[1];//just a dummy
+		noMoves[0] = pawn.trackIndex;
 		//special cases:
 		//pawn is on start and card lets it start
 		if (pawn.isOnStart() && card.canStartPawn()){
@@ -575,13 +576,13 @@ public class SRGameBoard {
 	public static void main(String [] args){
 		SRGameBoard gb = new SRGameBoard();
 		
-		//test cases for SRGameBoard findMoves
+		/*//test cases for SRGameBoard findMoves
 		//start a pawn on regular board to end on finish
 		SRPawn pawn = gb.pawns[0];
 		gb.movePawnTo(pawn,0);
 
 		//now get its moves:
-		SRCard card = new SRCard(7);
+		SRCard card = new SRCard(1);
 		card.canSplitMoves = false;
 		int [] moves = gb.findMoves(pawn, card);
 		System.out.println("================");
@@ -617,12 +618,19 @@ public class SRGameBoard {
 		//move a pawn backwards out of the safety zone
 		gb.movePawnTo(pawn,0);
 
-		//now get its moves:
-		card = new SRCard(1);
-		card.canSplitMoves = false;
-		moves = gb.findMoves(pawn, card);
-		gb.movePawnTo(pawn, moves[0]);
-		System.out.println("================");
-		
+		*/
+		Random rand = new Random();
+		int [] moves;
+		int choice;
+		SRCard card;
+		SRPawn pawn = gb.pawns[5];
+		while (!gb.deck.isEmpty()){
+			card = gb.deck.drawCard();
+			System.out.println("Trying to use card "+card.cardNum);
+			moves = gb.findMoves(pawn, card);
+			choice  = rand.nextInt(moves.length);
+			gb.movePawnTo(pawn, moves[choice]);
+			System.out.println("================");
+		}
 	}
 }

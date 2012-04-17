@@ -16,13 +16,71 @@ public class SRCard {
 	boolean canSplitMoves;
 	boolean canStartPawn;
 	boolean isSorry;
+	public SRRule [] rules;
 	
 	public SRCard(int cardNum) {
 		this.cardNum = cardNum;
+		
+		//sort out the images
 		if(cardNum == 0)
 			pictureName = "cardSorry.jpg";
 		else
 			pictureName = "card" + cardNum + ".jpg";
+		
+		//now set the rules
+		SRRule[] rules;
+		if (cardNum == 1) {
+			rules = new SRRule [2];
+			rules[0] = new SRRule("START");
+			rules[1] = new SRRule(1);
+		}
+		else if (cardNum == 2) {
+			rules = new SRRule [3];
+			rules[0] = new SRRule(2);
+			rules[1] = new SRRule("START");
+			rules[2] = new SRRule("DRAW");
+		}
+		else if (cardNum == 3) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(3);
+		}
+		else if (cardNum == 4) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(-4);
+		}
+		else if (cardNum == 5) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(5);
+		}
+		else if (cardNum == 7) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(7);
+		}
+		else if (cardNum == 8) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(8);
+		}
+		else if (cardNum == 10) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(10);
+		}
+		else if (cardNum == 11) {
+			rules = new SRRule [2];
+			rules[0] = new SRRule("SWAP");
+			rules[1] = new SRRule(11);
+		}
+		else if (cardNum == 12) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule(12);
+		}
+		else if (cardNum == 0) {
+			rules = new SRRule [1];
+			rules[0] = new SRRule("SORRY");
+		}
+		//else {
+		//	throw new Error("Uh oh... card number "+cardNum+ " does not exist!");
+		//}
+		
 	}
 	
 	public void setcardNum(int cardNum) {
