@@ -32,10 +32,14 @@ public class SRRule {
 		this();
 		if (numMoves == 7){
 			this.canSplit = true;
+			this.numMoves = 7;
 		}
 		else if (this.numMoves == 10){
 			this.shiftBackwards = true;
 			this.numMoves = 11;
+		}
+		else{
+			this.numMoves = numMoves;
 		}
 	}
 	public SRRule(String ruleStr){

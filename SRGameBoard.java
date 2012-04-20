@@ -99,11 +99,11 @@ public class SRGameBoard {
 	}
 	
 	public SRSquare getSquareAt(int index){
-		if (index < this.track.length){
+		if (index >= 0 && index < this.track.length){
 			return this.track[index];
 		}
 		else{
-			return new SRSquare(-1, -1, false);
+			throw new NullPointerException("There is no square at index "+index+".");
 		}
 	}
 	
@@ -437,9 +437,9 @@ public class SRGameBoard {
 	 * 
 	 * @param pawn
 	 * @param card
-	 * @return boolean
+	 * @return int
 	 */
-	public boolean movePawnTo(SRPawn pawn, int location){
+	public int movePawnTo(SRPawn pawn, int location){
 		//int location = (pawn.getTrackIndex()+distance)%SRGameBoard.trackLength;
 		//check for starting pawns
 		if (location >= 0 && location < this.track.length){
@@ -448,22 +448,22 @@ public class SRGameBoard {
 		//check for pawns going to start
 		else if (location < 0){
 			pawn.setOnStart(true);
-			return true;
+			return 1;
 		}
 		//check for pawns going out of bounds
 		else if (location > SRGameBoard.trackLength){
-			return false;
+			return 0;
 		}
 		
 		
 		//check for pawns that are going home
 		if (this.track[location].isHome){
 			pawn.setOnHome(true);
-			return true;
+			//return true;
 		}
 		//check for pawns that are already home?  do we need to?  why not.
 		else if (pawn.isOnHome()){
-			return false;
+			return 0;
 		}
 		
 		//bump (only bump the pawns of the opposing player)
@@ -478,7 +478,7 @@ public class SRGameBoard {
 			}
 			//but don't move if you'll land on yourself
 			else if (sameSquare){
-				return false;
+				return 0;
 			}
 		}
 
@@ -487,9 +487,14 @@ public class SRGameBoard {
 					           " squares from "+pawn.trackIndex+" to "+location+".");
 		}
 		
+		int currentIndex = pawn.getTrackIndex();
+		
+		System.out.println("Pawn current index is: " +currentIndex);
+		System.out.println("Pawn moving to: "+location);
+		
 		//move the pawn and slide too if we need it.
 		pawn.setTrackIndex(location);
-		return true;
+		return 1;
 	}
 	
 	/**
@@ -628,6 +633,9 @@ public class SRGameBoard {
 			card = gb.deck.drawCard();
 			System.out.println("Trying to use card "+card.cardNum);
 			moves = gb.findMoves(pawn, card);
+			for (int i =0; i<moves.length;i++){
+				System.out.println("Move ["+i+"] is "+moves[i]);
+			}
 			choice  = rand.nextInt(moves.length);
 			gb.movePawnTo(pawn, moves[choice]);
 			System.out.println("================");
