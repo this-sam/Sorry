@@ -115,7 +115,7 @@ public class SRGameBoard {
 	
 	//movement methods:
 	/**
-	 * This function uses the Pawn object’s current location, as well as the Rules associated
+	 * This function uses the Pawn object is current location, as well as the Rules associated
 	 * with the Card to determine where on the board the Pawn may move to. These
 	 * locations on the board are returned as an array of integers, representing indices
 	 * into the GameBoard.track object.
@@ -200,6 +200,15 @@ public class SRGameBoard {
 		}
 		if (safetyIndicesCount == 0){
 			safetyIndices = new int [0];
+		}
+		
+		int [] finalArray = cleanUpMoveArrays(regIndices, safetyIndices, canSplit);
+		
+		if (SRGameBoard.debug){
+			System.out.println("FindMoves returning from end: ");
+			for (int i=0;i<finalArray.length;i++){
+				System.out.println("\t"+finalArray[i]);
+			}
 		}
 		return cleanUpMoveArrays(regIndices, safetyIndices, canSplit);
 	}
@@ -293,17 +302,17 @@ public class SRGameBoard {
 	private int []  getSpecialMoves(SRPawn pawn, SRCard card) {
 		int[] moveIndices;
 		int indiceCount = 0;
-		int [] noMoves = new int[1];//just a dummy
-		noMoves[0] = pawn.trackIndex;
+		int [] noMoves = new int[0];//just a dummy
+		int [] finalArray = new int [0];
 		//special cases:
 		//pawn is on start and card lets it start
 		if (pawn.isOnStart() && card.canStartPawn()){
 			moveIndices = new int [1];
 			moveIndices[0]  = SRGameBoard.startIndex[pawn.getPlayer()]; 
-			return moveIndices;
+			finalArray = moveIndices;
 		}
 		//pawn moving from start and can bump another pawn
-		if (pawn.isOnStart() && card.isSorry()){
+		else if (pawn.isOnStart() && card.isSorry()){
 			SRPawn [] otherPawns = this.getOpponentPawns(pawn.getPlayer());
 			moveIndices = new int [4];
 			for (int i=0; i<4;i++){
@@ -312,17 +321,24 @@ public class SRGameBoard {
 					moveIndices[indiceCount] = otherPawn.trackIndex;
 				}
 			}
-			return this.trimArray(moveIndices, indiceCount);
+			finalArray = this.trimArray(moveIndices, indiceCount);
 		}
 		//pawn is on start and card doesn't let it start
 		else if (pawn.isOnStart()){
-			return noMoves;
+			finalArray = noMoves;
 		}
 		//if pawn is on home
 		else if (pawn.isOnHome()){
-			return noMoves;
+			finalArray = noMoves;
 		}
-		return new int [0];
+		
+		if (SRGameBoard.debug){
+			System.out.println("getSpecialMoves returning: ");
+			for (int i=0;i<finalArray.length;i++){
+				System.out.println("\t"+finalArray[i]);
+			}
+		}
+		return finalArray;
 	}
 	
 	

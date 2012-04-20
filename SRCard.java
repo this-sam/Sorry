@@ -12,6 +12,7 @@ public class SRCard {
 	
 	//The following methods will set both the cardNum and the pictureName.
 	public int cardNum;
+	public int numMoves;
 	private String pictureName;
 	boolean canSplitMoves;
 	boolean canStartPawn;
