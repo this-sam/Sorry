@@ -714,6 +714,11 @@ public class SRGameBoard {
 				System.out.print(" || onHome = " + gb.pawns[i].onHome + ", trackIndex = " +gb.pawns[i].trackIndex+"\n");
 			}
 			System.out.println("\n\n========================");
+			
+			if (gb.hasWon(0) || gb.hasWon(1)){
+				System.out.println("The game has been won!");
+				break;
+			}
 		}
 	}
 }
