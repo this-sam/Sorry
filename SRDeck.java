@@ -21,6 +21,29 @@ public class SRDeck {
 		discardPile = new ArrayList<SRCard>(45);
 		drawPile = new ArrayList<SRCard>(45);
 		//Add cards to the drawPile according to how many of each kind
+		fillDeck();
+		//*******  Comment out when testing this class
+		shuffle(); //Shuffles the new deck
+	}
+
+	//This function will shuffle the discard pile into a random set of cards
+	public void shuffle() {
+		Random rand = new Random();
+		int j;
+		for (int i = 0; i < drawPile.size(); i++) {
+			j = rand.nextInt(drawPile.size()-1);
+			SRCard temp = drawPile.get(i);
+			drawPile.set(i, drawPile.get(j));
+			drawPile.set(j, temp);			
+		}
+	}
+	
+	public void resetDeck(){
+		fillDeck();
+		discardPile = new ArrayList<SRCard>(45);
+	}
+	
+	public void fillDeck(){
 		for(int i = 0; i<4; i++) {
 			drawPile.add(new SRCard(0));
 		}for(int i = 0; i<5; i++) {
@@ -44,20 +67,6 @@ public class SRDeck {
 		}for(int i = 0; i<4; i++) {
 			drawPile.add(new SRCard(12));
 		}
-		//*******  Comment out when testing this class
-		shuffle(); //Shuffles the new deck
-	}
-
-	//This function will shuffle the discard pile into a random set of cards
-	public void shuffle() {
-		Random rand = new Random();
-		int j;
-		for (int i = 0; i < drawPile.size(); i++) {
-			j = rand.nextInt(drawPile.size()-1);
-			SRCard temp = drawPile.get(i);
-			drawPile.set(i, drawPile.get(j));
-			drawPile.set(j, temp);			
-		}
 	}
 	
 	//Will select the top card off of the drawPile and return it
@@ -65,6 +74,11 @@ public class SRDeck {
 			SRCard drawCard = drawPile.get(0); //Choose top card of the deck
 			discardPile.add(drawPile.get(0)); //Add chosen card to discardPile
 			drawPile.remove(0); //Remove top card off the deck
+			
+			//whee the deck never ends now
+			if (this.isEmpty()){
+				resetDeck();
+			}
 			return drawCard;		
 	}
 

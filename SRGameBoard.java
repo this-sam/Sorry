@@ -19,12 +19,12 @@ import java.util.Random;
  */
 public class SRGameBoard {
 	//debug
-	private static boolean debug = true;
+	private static boolean debug = false;
 	
 	//constants
 	public static final int trackLength = 56;
 	public static final int safetyLength = 5;
-	public static final int[] safetyZoneIndex = {60,66};
+	public static final int[] safetyZoneIndex = {56,60};
 	public static final int[] safetyZoneEntrance = {2, 29};
 	public static final int[] startIndex = {4,32};
 	public static final int slideLength = 4;
@@ -33,7 +33,7 @@ public class SRGameBoard {
 	
 	
 	//gameplay	
-	public SRSquare[] track = new SRSquare[66];	//squares that make up the regular track, safety zones, and home squares
+	public SRSquare[] track = new SRSquare[65];	//squares that make up the regular track, safety zones, and home squares
 	public SRSquare[] startSquares  = new SRSquare[2];	//indexes into the track representing where players may move their pawns into play
 	public SRDeck deck;	//Deck object used in this game
 	public SRPawn[] pawns  = new SRPawn[8];	//8 pawns used in the game
@@ -62,6 +62,12 @@ public class SRGameBoard {
 					track[i].slideLength = SRGameBoard.slideLength;
 				}
 			}
+		}
+		
+		//mark home squares
+		for (int i=0;i<SRGameBoard.safetyZoneIndex.length;i++){
+			System.out.println("Home square will be: "+(SRGameBoard.safetyZoneIndex[i]+SRGameBoard.safetyLength-1));
+			this.track[SRGameBoard.safetyZoneIndex[i]+SRGameBoard.safetyLength-1].setIsHome(true);
 		}
 		
 		//create startSquares
@@ -125,23 +131,36 @@ public class SRGameBoard {
 	 * @return
 	 */
 	public int[] findMoves(SRPawn pawn, SRCard card){
-		int numMoves = card.getcardNum();//change when card truly has "rules"
-		int [] moveIndices;
-		boolean canSplit = card.canSplitMoves();
+		int [] finalArray = new int [0];
+		int [] nextMoves;
 		
+		for (int i=0;i<card.rules.length; i++){
+			nextMoves = findMoves(pawn, card.rules[i]);
+			finalArray = concatArrays(finalArray, nextMoves);
+		}
+		
+		return finalArray;
+	}
+	
+	public int[] findMoves(SRPawn pawn, SRRule rule){
+		int numMoves = rule.numMoves;//change when card truly has "rules"
+		int [] moveIndices;
+		boolean canSplit = rule.canSplit;
 		
 		//figure out the direction of the pawn beforehand so we only need one loop (handles
 		//both - and + move directions.)
-		int step =  getStep(numMoves);
+		int step = getStep(numMoves);
 		
 		//test for "special case" type moves
-		moveIndices = getSpecialMoves(pawn, card);
+		moveIndices = getSpecialMoves(pawn, rule);
 		if (moveIndices.length > 0){
 			return moveIndices;
 		}
 		
 		int currIndex = pawn.getTrackIndex();
-		
+		if (currIndex == -1 && !rule.canStart){
+			return moveIndices;
+		}
 		//make room for indices
 		int [] regIndices = new int [numMoves*step];
 		int regIndicesCount = 0;
@@ -221,8 +240,7 @@ public class SRGameBoard {
 	 * @param canSplit
 	 * @return
 	 */
-	private int[] cleanUpMoveArrays(int[] regIndices, int[] safetyIndices,
-		boolean canSplit) {
+	private int[] cleanUpMoveArrays(int[] regIndices, int[] safetyIndices, boolean canSplit) {
 		int regIndicesCount;
 		int safetyIndicesCount;
 		int [] moveIndices;
@@ -299,20 +317,27 @@ public class SRGameBoard {
 	}
 	
 	//gets all "special" moves for cards (ie. sorry!, all non-generic movement)
-	private int []  getSpecialMoves(SRPawn pawn, SRCard card) {
+	private int []  getSpecialMoves(SRPawn pawn, SRRule rule) {
 		int[] moveIndices;
 		int indiceCount = 0;
 		int [] noMoves = new int[0];//just a dummy
 		int [] finalArray = new int [0];
+		
+		
 		//special cases:
 		//pawn is on start and card lets it start
-		if (pawn.isOnStart() && card.canStartPawn()){
+		//if pawn is on home
+		if (pawn.isOnHome()){
+			finalArray = noMoves;
+		}
+		else if (pawn.isOnStart() && rule.canStart){
 			moveIndices = new int [1];
 			moveIndices[0]  = SRGameBoard.startIndex[pawn.getPlayer()]; 
 			finalArray = moveIndices;
 		}
 		//pawn moving from start and can bump another pawn
-		else if (pawn.isOnStart() && card.isSorry()){
+		//or if pawn is not on start and may switch places with another pawn
+		else if ((pawn.isOnStart() && rule.isSorry) || (!pawn.isOnStart() && rule.canSwitch)){
 			SRPawn [] otherPawns = this.getOpponentPawns(pawn.getPlayer());
 			moveIndices = new int [4];
 			for (int i=0; i<4;i++){
@@ -324,14 +349,11 @@ public class SRGameBoard {
 			finalArray = this.trimArray(moveIndices, indiceCount);
 		}
 		//pawn is on start and card doesn't let it start
-		else if (pawn.isOnStart()){
+		else if (pawn.isOnStart() && !rule.canStart){
 			finalArray = noMoves;
 		}
-		//if pawn is on home
-		else if (pawn.isOnHome()){
-			finalArray = noMoves;
-		}
-		
+
+		//debugging output of each move
 		if (SRGameBoard.debug){
 			System.out.println("getSpecialMoves returning: ");
 			for (int i=0;i<finalArray.length;i++){
@@ -387,7 +409,7 @@ public class SRGameBoard {
 	//figures out where the pawn can move in the safetyZone
 	public int [] getSafetyMoves(int player, int currIndex, int numMoves){	
 		int safetyStart = SRGameBoard.safetyZoneIndex[player];
-		int safetyEnd = safetyStart + SRGameBoard.safetyLength;
+		int safetyEnd = safetyStart + SRGameBoard.safetyLength-1;
 		int min = 0;
 		int max = 0 + numMoves;
 		if (numMoves < 0){
@@ -456,6 +478,7 @@ public class SRGameBoard {
 	 * @return int
 	 */
 	public int movePawnTo(SRPawn pawn, int location){
+		System.out.println("in Move Pawn To");
 		//int location = (pawn.getTrackIndex()+distance)%SRGameBoard.trackLength;
 		//check for starting pawns
 		if (location >= 0 && location < this.track.length){
@@ -467,15 +490,13 @@ public class SRGameBoard {
 			return 1;
 		}
 		//check for pawns going out of bounds
-		else if (location > SRGameBoard.trackLength){
+		else if (location > SRGameBoard.trackLength+SRGameBoard.safetyLength*2){
 			return 0;
 		}
-		
-		
+				
 		//check for pawns that are going home
 		if (this.track[location].isHome){
 			pawn.setOnHome(true);
-			//return true;
 		}
 		//check for pawns that are already home?  do we need to?  why not.
 		else if (pawn.isOnHome()){
@@ -493,7 +514,7 @@ public class SRGameBoard {
 				}
 			}
 			//but don't move if you'll land on yourself
-			else if (sameSquare){
+			else if (sameSquare && !this.track[location].isHome){
 				return 0;
 			}
 		}
@@ -594,6 +615,16 @@ public class SRGameBoard {
 		return tempArray;
 	}
 	
+	//concatenates two arrays
+	private int [] concatArrays(int [] array1, int [] array2){
+		int [] finalArray = new int [array1.length + array2.length];
+		
+		System.arraycopy(array1,  0, finalArray, 0, array1.length);
+		System.arraycopy(array2,  0, finalArray, array1.length, array2.length);
+		
+		return finalArray;
+	}
+	
 	public static void main(String [] args){
 		SRGameBoard gb = new SRGameBoard();
 		
@@ -644,17 +675,40 @@ public class SRGameBoard {
 		int [] moves;
 		int choice;
 		SRCard card;
-		SRPawn pawn = gb.pawns[5];
-		while (!gb.deck.isEmpty()){
+		SRPawn pawn;
+		int pawnIndex;
+		
+		while (!gb.deck.isEmpty() && !gb.hasWon(0) && !gb.hasWon(1)){
+			
+			do{
+				pawnIndex = rand.nextInt(8);
+				pawn = gb.pawns[pawnIndex];
+			}while(pawn.isOnHome());
+			
+			System.out.println("Moving pawn "+pawnIndex+" from "+pawn.getTrackIndex());
 			card = gb.deck.drawCard();
 			System.out.println("Trying to use card "+card.cardNum);
 			moves = gb.findMoves(pawn, card);
+			
 			for (int i =0; i<moves.length;i++){
 				System.out.println("Move ["+i+"] is "+moves[i]);
 			}
-			choice  = rand.nextInt(moves.length);
-			gb.movePawnTo(pawn, moves[choice]);
-			System.out.println("================");
+			
+			if(moves.length>1){
+				choice  = rand.nextInt(moves.length);
+				gb.movePawnTo(pawn, moves[choice]);
+			}
+			else if (moves.length == 1){
+				gb.movePawnTo(pawn, moves[0]);
+			}
+			else{
+				System.out.println("No moves.");
+			}
+			System.out.println("= = = = = = = = = = = = ");
+			for (int i=0; i<gb.pawns.length;i++){
+				System.out.println("Pawn "+i+" is at location "+gb.pawns[i].trackIndex);
+			}
+			System.out.println("\n\n========================");
 		}
 	}
 }

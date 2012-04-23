@@ -29,7 +29,7 @@ public class SRCard {
 			pictureName = "card" + cardNum + ".jpg";
 		
 		//now set the rules
-		SRRule[] rules;
+		//SRRule[] rules;
 		if (cardNum == 1) {
 			rules = new SRRule [2];
 			rules[0] = new SRRule("START");

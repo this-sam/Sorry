@@ -55,6 +55,10 @@ public class SRSquare {
 		this.maxPawns = maxPawns;
 	}
 	
+	public void setIsHome(boolean isHome){
+		this.isHome = isHome;
+	}
+	
 	//**********TEST FUNCTION*************
 	public static void main(String[] args) {
 		

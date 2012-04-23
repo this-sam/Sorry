@@ -86,7 +86,6 @@ public class SRPawn {
 	public void setOnHome(boolean onHome) {
 		this.onHome = onHome;
 		this.onStart = false;
-		this.trackIndex = -1;
 	}
 
 	public void setTrackIndex(int index) {
