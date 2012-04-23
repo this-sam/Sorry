@@ -24,7 +24,7 @@ public class SRGameBoard {
 	//constants
 	public static final int trackLength = 56;
 	public static final int safetyLength = 5;
-	public static final int[] safetyZoneIndex = {56,60};
+	public static final int[] safetyZoneIndex = {56,61};
 	public static final int[] safetyZoneEntrance = {2, 29};
 	public static final int[] startIndex = {4,32};
 	public static final int slideLength = 4;
@@ -33,7 +33,7 @@ public class SRGameBoard {
 	
 	
 	//gameplay	
-	public SRSquare[] track = new SRSquare[65];	//squares that make up the regular track, safety zones, and home squares
+	public SRSquare[] track = new SRSquare[66];	//squares that make up the regular track, safety zones, and home squares
 	public SRSquare[] startSquares  = new SRSquare[2];	//indexes into the track representing where players may move their pawns into play
 	public SRDeck deck;	//Deck object used in this game
 	public SRPawn[] pawns  = new SRPawn[8];	//8 pawns used in the game
@@ -299,10 +299,6 @@ public class SRGameBoard {
 	}
 	
 	/**
-	 * cleanMoveArray -- "cleans up" the array of movements 
-	 */
-	
-	/**
 	 * Calculate the direction of the move.
 	 * 
 	 * @param numMoves
@@ -409,7 +405,7 @@ public class SRGameBoard {
 	//figures out where the pawn can move in the safetyZone
 	public int [] getSafetyMoves(int player, int currIndex, int numMoves){	
 		int safetyStart = SRGameBoard.safetyZoneIndex[player];
-		int safetyEnd = safetyStart + SRGameBoard.safetyLength-1;
+		int safetyEnd = safetyStart + SRGameBoard.safetyLength;
 		int min = 0;
 		int max = 0 + numMoves;
 		if (numMoves < 0){
@@ -478,7 +474,7 @@ public class SRGameBoard {
 	 * @return int
 	 */
 	public int movePawnTo(SRPawn pawn, int location){
-		System.out.println("in Move Pawn To");
+		System.out.print("movePawnTo breaking at ");
 		//int location = (pawn.getTrackIndex()+distance)%SRGameBoard.trackLength;
 		//check for starting pawns
 		if (location >= 0 && location < this.track.length){
@@ -487,19 +483,23 @@ public class SRGameBoard {
 		//check for pawns going to start
 		else if (location < 0){
 			pawn.setOnStart(true);
+			System.out.println("pawns going to start.");
 			return 1;
 		}
 		//check for pawns going out of bounds
 		else if (location > SRGameBoard.trackLength+SRGameBoard.safetyLength*2){
+			System.out.println("pawns out of bounds.");
 			return 0;
 		}
 				
 		//check for pawns that are going home
 		if (this.track[location].isHome){
+			System.out.println("(Player "+pawn.player+" pawn "+pawn.id+" is home!)");
 			pawn.setOnHome(true);
 		}
 		//check for pawns that are already home?  do we need to?  why not.
 		else if (pawn.isOnHome()){
+			System.out.println("pawns already at home.");
 			return 0;
 		}
 		
@@ -515,6 +515,7 @@ public class SRGameBoard {
 			}
 			//but don't move if you'll land on yourself
 			else if (sameSquare && !this.track[location].isHome){
+				System.out.println("landing on yourself.");
 				return 0;
 			}
 		}
@@ -523,6 +524,8 @@ public class SRGameBoard {
 			System.out.println("Moved player"+pawn.player+" pawn "+(location-pawn.getTrackIndex())+
 					           " squares from "+pawn.trackIndex+" to "+location+".");
 		}
+		
+		System.out.println("the final return.");
 		
 		int currentIndex = pawn.getTrackIndex();
 		
@@ -555,6 +558,7 @@ public class SRGameBoard {
 	 * @param pawn
 	 */
 	public void bumpPawn(SRPawn pawn){
+		System.out.println("\n(Player "+pawn.player+" pawn "+pawn.id+" was bumped.)\n");
 		pawn.bump();
 	}
 	
@@ -678,8 +682,8 @@ public class SRGameBoard {
 		SRPawn pawn;
 		int pawnIndex;
 		
-		while (!gb.deck.isEmpty() && !gb.hasWon(0) && !gb.hasWon(1)){
-			
+		//while (!gb.deck.isEmpty() && !gb.hasWon(0) && !gb.hasWon(1)){
+		for(int p=0;p<1000;p++){
 			do{
 				pawnIndex = rand.nextInt(8);
 				pawn = gb.pawns[pawnIndex];
@@ -706,7 +710,8 @@ public class SRGameBoard {
 			}
 			System.out.println("= = = = = = = = = = = = ");
 			for (int i=0; i<gb.pawns.length;i++){
-				System.out.println("Pawn "+i+" is at location "+gb.pawns[i].trackIndex);
+				System.out.print("Player "+gb.pawns[i].player+" pawn "+gb.pawns[i].id+" is at "+gb.pawns[i].trackIndex);
+				System.out.print(" || onHome = " + gb.pawns[i].onHome + ", trackIndex = " +gb.pawns[i].trackIndex+"\n");
 			}
 			System.out.println("\n\n========================");
 		}

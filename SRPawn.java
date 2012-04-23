@@ -79,19 +79,14 @@ public class SRPawn {
 	//setters
 	public void setOnStart(boolean onStart) {
 		this.onStart = onStart;
-		this.onHome = false;
-		this.trackIndex = -1;
 	}
 	
 	public void setOnHome(boolean onHome) {
 		this.onHome = onHome;
-		this.onStart = false;
 	}
 
 	public void setTrackIndex(int index) {
 		this.trackIndex = index;
-		this.onHome = false;
-		this.onStart = false;
 	}
 
 	//moves player back to Start square
