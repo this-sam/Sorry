@@ -471,10 +471,10 @@ public class SRGameBoard {
 	 * 
 	 * @param pawn
 	 * @param card
-	 * @return int
+	 * @return int 
 	 */
 	public int movePawnTo(SRPawn pawn, int location){
-		System.out.print("movePawnTo breaking at ");
+		//System.out.print("movePawnTo breaking at ");
 		//int location = (pawn.getTrackIndex()+distance)%SRGameBoard.trackLength;
 		//check for starting pawns
 		if (location >= 0 && location < this.track.length){
@@ -483,23 +483,23 @@ public class SRGameBoard {
 		//check for pawns going to start
 		else if (location < 0){
 			pawn.setOnStart(true);
-			System.out.println("pawns going to start.");
+			//System.out.println("pawns going to start.");
 			return 1;
 		}
 		//check for pawns going out of bounds
 		else if (location > SRGameBoard.trackLength+SRGameBoard.safetyLength*2){
-			System.out.println("pawns out of bounds.");
+			//System.out.println("pawns out of bounds.");
 			return 0;
 		}
 				
 		//check for pawns that are going home
 		if (this.track[location].isHome){
-			System.out.println("(Player "+pawn.player+" pawn "+pawn.id+" is home!)");
+			//System.out.println("(Player "+pawn.player+" pawn "+pawn.id+" is home!)");
 			pawn.setOnHome(true);
 		}
 		//check for pawns that are already home?  do we need to?  why not.
 		else if (pawn.isOnHome()){
-			System.out.println("pawns already at home.");
+			//System.out.println("pawns already at home.");
 			return 0;
 		}
 		
@@ -515,7 +515,7 @@ public class SRGameBoard {
 			}
 			//but don't move if you'll land on yourself
 			else if (sameSquare && !this.track[location].isHome){
-				System.out.println("landing on yourself.");
+				//System.out.println("landing on yourself.");
 				return 0;
 			}
 		}
@@ -525,7 +525,7 @@ public class SRGameBoard {
 					           " squares from "+pawn.trackIndex+" to "+location+".");
 		}
 		
-		System.out.println("the final return.");
+		//System.out.println("the final return.");
 		
 		int currentIndex = pawn.getTrackIndex();
 		
@@ -534,9 +534,49 @@ public class SRGameBoard {
 		
 		//move the pawn and slide too if we need it.
 		pawn.setTrackIndex(location);
-		return 1;
+		int distance = getDistanceBetween(currentIndex, location);
+		System.out.println("Number of spaces: "+distance);
+		return distance;
 	}
 	
+	private int getDistanceBetween(int index1, int index2){
+		if (index1 < index2){
+			int temp = index1;
+			index1 = index2;
+			index2 = temp;
+		}
+		
+		int distance = 0;
+		int normalDist = 0;
+		//if they are only moving on the safety zone
+		if (index1 > this.trackLength && index2 > this.trackLength){
+			distance = index1 - index2;
+		}
+		//if they are only moving in the regular track
+		else if (0 <= index1 && index1 < this.trackLength &&
+				 0 <= index2 && index2 < this.trackLength ){
+			distance = index1 - index2;
+		}
+		//now if index1 is the safetyZone entrance
+		else {
+			//assume player 0 safetyZone
+			int zone = 0;
+			//check if it is player 1 
+			if (index1 > this.safetyZoneIndex[1]){
+				zone = 1;
+			}
+			distance =index1-this.safetyZoneIndex[zone];
+			normalDist = index2 - this.safetyZoneEntrance[zone];
+		}
+		
+		if (distance < 0){
+			distance*=-1;
+		}
+		if (normalDist < 0){
+			normalDist*=-1;
+		}
+		return distance+normalDist;
+	}
 	/**
 	 * Determines the location that the move will take the pawn to, and calls
 	 * the movePawnTo function.
