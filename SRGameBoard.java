@@ -713,8 +713,8 @@ public class SRGameBoard {
 		//move a pawn onto a sliding square:
 		//move a pawn backwards out of the safety zone
 		gb.movePawnTo(pawn,0);
-
 		*/
+		
 		Random rand = new Random();
 		int [] moves;
 		int choice;

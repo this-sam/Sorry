@@ -611,7 +611,7 @@ public class SRGUI extends JFrame {
         	}
         }
         repaint();
-        revalidate();
+        //revalidate();
     }//end of squareLightUp()
 
     
@@ -644,7 +644,7 @@ public class SRGUI extends JFrame {
     	}
     	
     	repaint();
-    	revalidate();
+    	//revalidate();
     }//end of bumpedSquareLightUp()
     
     
@@ -929,7 +929,7 @@ public class SRGUI extends JFrame {
     	}
     	    		
     	repaint();
-        revalidate();
+        //revalidate();
         
         return successfulMovement;
     }//end of movePawn()
@@ -974,7 +974,7 @@ public class SRGUI extends JFrame {
                 }
             }
             repaint();
-            revalidate();
+            //revalidate();
         }// end of actionPerformed() handler
         
     }//end of PawnButtonListener class
@@ -1123,7 +1123,7 @@ public class SRGUI extends JFrame {
 	private void displayCard(String cardImage) {
 		displayCardLabel.setIcon(new ImageIcon(cardImage));
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of displayCard()
 	
     
@@ -1151,7 +1151,7 @@ public class SRGUI extends JFrame {
         	}
         }
         repaint();
-        revalidate();
+        //revalidate();
     }//end of selectPawn()
     
     
@@ -1195,7 +1195,7 @@ public class SRGUI extends JFrame {
     	}
     	yellowHomePane.remove(yellowHomeButton);
     	repaint();
-    	revalidate();
+    	//revalidate();
     }
     
     /**
