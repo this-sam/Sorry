@@ -20,12 +20,13 @@ import java.util.Random;
 public class SRGameBoard {
 	//debug
 	private static boolean debug = false;
+	private static boolean pawnsStartHome = false;
 	
 	//constants
 	public static final int trackLength = 56;
 	public static final int safetyLength = 6;
 	public static final int[] safetyZoneIndex = {56,62};
-	public static final int[] safetyZoneEntrance = {2, 30};
+	public static final int[] safetyZoneEntrance = {2, 29};
 	public static final int[] startIndex = {4,32};
 	public static final int slideLength = 3;
 	public static final int[] slideIndex = {1,9, 15, 23, 29, 37, 43, 51}; 
@@ -62,6 +63,8 @@ public class SRGameBoard {
 					track[i].slideLength = SRGameBoard.slideLength;
 				}
 			}
+			if (i == 61 || i == 67)
+				track[i].isHome = true;
 		}
 		
 		//mark home squares
@@ -96,6 +99,14 @@ public class SRGameBoard {
 		//testing:
 		if (SRGameBoard.debug){
 			System.out.println("GameBoard initialized.");//for testing
+		}
+		
+		if (SRGameBoard.pawnsStartHome){
+			for (int i=0; i<this.pawns.length;i++){
+				if (i!=0 && i!=5){
+					movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-1);
+				}
+			}
 		}
 		
 	}
@@ -481,13 +492,13 @@ public class SRGameBoard {
 			location += this.track[location].getSlideLength();
 		}
 		//check for pawns going to start
-		else if (location == -1){
+		else if (location < 0){
 			pawn.setOnStart(true);
 			//System.out.println("pawns going to start.");
 			return 1;
 		}
 		//check for pawns going out of bounds
-		else if (location > SRGameBoard.trackLength+SRGameBoard.safetyLength*2 || location == -2){
+		else if (location > SRGameBoard.trackLength+SRGameBoard.safetyLength*2){
 			//System.out.println("pawns out of bounds.");
 			return 0;
 		}
@@ -713,8 +724,8 @@ public class SRGameBoard {
 		//move a pawn onto a sliding square:
 		//move a pawn backwards out of the safety zone
 		gb.movePawnTo(pawn,0);
-
 		*/
+		
 		Random rand = new Random();
 		int [] moves;
 		int choice;
