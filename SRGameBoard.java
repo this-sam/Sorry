@@ -20,11 +20,12 @@ import java.util.Random;
 public class SRGameBoard {
 	//debug
 	private static boolean debug = false;
+	private static boolean pawnsStartHome = false;
 	
 	//constants
 	public static final int trackLength = 56;
-	public static final int safetyLength = 5;
-	public static final int[] safetyZoneIndex = {56,61};
+	public static final int safetyLength = 6;
+	public static final int[] safetyZoneIndex = {56,62};
 	public static final int[] safetyZoneEntrance = {2, 29};
 	public static final int[] startIndex = {4,32};
 	public static final int slideLength = 4;
@@ -33,7 +34,7 @@ public class SRGameBoard {
 	
 	
 	//gameplay	
-	public SRSquare[] track = new SRSquare[66];	//squares that make up the regular track, safety zones, and home squares
+	public SRSquare[] track = new SRSquare[68];	//squares that make up the regular track, safety zones, and home squares
 	public SRSquare[] startSquares  = new SRSquare[2];	//indexes into the track representing where players may move their pawns into play
 	public SRDeck deck;	//Deck object used in this game
 	public SRPawn[] pawns  = new SRPawn[8];	//8 pawns used in the game
@@ -96,6 +97,14 @@ public class SRGameBoard {
 		//testing:
 		if (SRGameBoard.debug){
 			System.out.println("GameBoard initialized.");//for testing
+		}
+		
+		if (SRGameBoard.pawnsStartHome){
+			for (int i=0; i<this.pawns.length;i++){
+				if (i!=0 && i!=5){
+					movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-1);
+				}
+			}
 		}
 		
 	}
@@ -713,8 +722,8 @@ public class SRGameBoard {
 		//move a pawn onto a sliding square:
 		//move a pawn backwards out of the safety zone
 		gb.movePawnTo(pawn,0);
-
 		*/
+		
 		Random rand = new Random();
 		int [] moves;
 		int choice;

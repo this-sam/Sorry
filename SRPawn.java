@@ -87,6 +87,12 @@ public class SRPawn {
 
 	public void setTrackIndex(int index) {
 		this.trackIndex = index;
+		if (this.trackIndex == -1){
+			this.setOnStart(true);
+		}
+		else if (this.isOnStart() == true){
+			this.setOnStart(false);
+		}
 	}
 
 	//moves player back to Start square
