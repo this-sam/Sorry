@@ -1,9 +1,14 @@
+package src;
 /*
  * SRGUI.java
  * This class will handle all visual components and movements of images.
  * It is well separated from the game logic and interacts with SRGameBoard through SRDriver.
  * 
  */
+
+import SRCard;
+import SRGameBoard;
+import SRRule;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -837,7 +842,7 @@ public class SorryGame extends JApplet {
 			}
 		}
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of squareLightUp()
 
 	/**
@@ -1106,7 +1111,7 @@ public class SorryGame extends JApplet {
 			
 	 		
 			repaint();
-			revalidate();
+			//revalidate();
 		}// end of actionPerformed() handler
 
 	}// end of PawnButtonListener class
@@ -1152,7 +1157,7 @@ public class SorryGame extends JApplet {
 		}
 		
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of selectPawn()
 
 	/**
@@ -1368,7 +1373,7 @@ public class SorryGame extends JApplet {
 		displayCardLabel.setVisible(true);
 		displayCardLabel.setIcon(new ImageIcon("C:/Users/xsong/Sorry/" + cardImage));
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of displayCard()
 	
 	public void clearCardDisplay() {
@@ -1449,7 +1454,7 @@ public class SorryGame extends JApplet {
 		}
 		yellowHomePane.remove(yellowHomeButton);
 		repaint();
-		revalidate();
+		//revalidate();
 	}
 	
 	public void showCongratulationDialog(int player) {
