@@ -486,6 +486,7 @@ public class SRGameBoard {
 		//System.out.print("movePawnTo breaking at ");
 		//int location = (pawn.getTrackIndex()+distance)%SRGameBoard.trackLength;
 		//check for starting pawns
+		int unalteredLocation = location;
 		if (location >= 0 && location < this.track.length){
 			location += this.track[location].getSlideLength();
 		}
@@ -543,7 +544,7 @@ public class SRGameBoard {
 		
 		//move the pawn and slide too if we need it.
 		pawn.setTrackIndex(location);
-		int distance = getDistanceBetween(currentIndex, location);
+		int distance = getDistanceBetween(currentIndex, unalteredLocation);
 		System.out.println("Number of spaces: "+distance);
 		return distance;
 	}
