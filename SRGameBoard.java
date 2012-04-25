@@ -67,7 +67,6 @@ public class SRGameBoard {
 		
 		//mark home squares
 		for (int i=0;i<SRGameBoard.safetyZoneIndex.length;i++){
-			System.out.println("Home square will be: "+(SRGameBoard.safetyZoneIndex[i]+SRGameBoard.safetyLength-1));
 			this.track[SRGameBoard.safetyZoneIndex[i]+SRGameBoard.safetyLength-1].setIsHome(true);
 		}
 		
