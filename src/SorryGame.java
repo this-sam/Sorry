@@ -894,10 +894,11 @@ public class SorryGame extends JApplet {
 			// the pawn was either in the home square or in an invalid position
 			// This situation should not occur if the game running correctly. So
 			// it is also a debug/test tool.
-			else
+			else {
 				System.out
-						.println("ERROR: This pawn is in the home or an invalid position. Current position: "
-								+ board.pawns[pawnNum].getTrackIndex());
+						.println("This red pawn was previously removed and now has been added to destination");
+				successfulMove = true;
+			}
 			// end of removing the red pawn from previous location
 
 			/************ move the red pawn to the destination square ************/			
@@ -908,7 +909,8 @@ public class SorryGame extends JApplet {
 			if (destinationSquareIndex >= 0 && destinationSquareIndex < 56) {
 				destinationSquarePaneIndex = outerTrackPaneIndex[destinationSquareIndex];
 				transparentSquarePane[destinationSquarePaneIndex]
-						.remove(outerTrackButtons[destinationSquareIndex]);
+						.removeAll();
+						//.remove(outerTrackButtons[destinationSquareIndex]);
 				transparentSquarePane[destinationSquarePaneIndex].add(redPawn[pawnNum]);
 				
 				successfulMove = true;
@@ -917,14 +919,15 @@ public class SorryGame extends JApplet {
 			else if (destinationSquareIndex >= 56 && destinationSquareIndex < 61) {
 				destinationSquarePaneIndex = destinationSquareIndex - 62;
 				redSafetyZoneSquarePane[destinationSquarePaneIndex]
-						.remove(yellowSafetyZoneButtons[destinationSquarePaneIndex]);
+						.removeAll();
+						//.remove(redSafetyZoneButtons[destinationSquarePaneIndex]);
 				redSafetyZoneSquarePane[destinationSquarePaneIndex].add(redPawn[pawnNum]);
 				
 				successfulMove = true;
 			}
 			// move red pawn to its home
 			else if (destinationSquareIndex == 61) {
-				board.pawns[pawnNum].setOnHome(true);
+				//board.pawns[pawnNum].setOnHome(true);
 				redHomePane.add(redPawn[pawnNum]);
 				redPawn[pawnNum].setEnabled(false);
 				successfulMove = true;
@@ -933,7 +936,7 @@ public class SorryGame extends JApplet {
 			else if (destinationSquareIndex == -1) {
 				destinationSquarePaneIndex = pawnNum;
 				redStartSquarePane[destinationSquarePaneIndex].add(
-														redPawn[destinationSquarePaneIndex]);
+														redPawn[pawnNum]);
 				successfulMove = true;
 			}
 			// cannot move red pawn to the yellow safety zone or yellow home.
@@ -956,7 +959,8 @@ public class SorryGame extends JApplet {
 			if (previousSquareIndex >= 0 && previousSquareIndex < 56) {
 				previousSquarePaneIndex = outerTrackPaneIndex[previousSquareIndex];
 				transparentSquarePane[previousSquarePaneIndex]
-						.remove(yellowPawn[pawnNum - 4]);
+						.removeAll();
+						//.remove(yellowPawn[pawnNum - 4]);
 				if (SorryGame.debug) {
 					System.out.println("outerTrackButtons added back is : " + outerTrackButtons[previousSquareIndex].getActionCommand());
 				}
@@ -971,7 +975,8 @@ public class SorryGame extends JApplet {
 			else if (previousSquareIndex >= 62 && previousSquareIndex < 67) {
 				previousSquarePaneIndex = previousSquareIndex - 62;
 				yellowSafetyZoneSquarePane[previousSquarePaneIndex]
-						.remove(yellowPawn[pawnNum - 4]);
+						.removeAll();
+						//.remove(yellowPawn[pawnNum - 4]);
 				yellowSafetyZoneSquarePane[previousSquarePaneIndex]
 						.add(yellowSafetyZoneButtons[previousSquarePaneIndex]);
 				yellowSafetyZoneButtons[previousSquarePaneIndex]
@@ -992,9 +997,8 @@ public class SorryGame extends JApplet {
 			// Debug/test tool
 			else {
 				System.out
-						.println("ERROR: This pawn is in the home or an invalid position. Current position: "
-								+ previousSquareIndex);
-				successfulMove = false;
+						.println("This red pawn was previously removed and now has been added to destination");
+				successfulMove = true;
 			}
 			// end of removing the yellow pawn from previous location
 
@@ -1010,7 +1014,8 @@ public class SorryGame extends JApplet {
 					System.out.println("destinationSquarePaneIndex is " + destinationSquarePaneIndex);
 				}
 				transparentSquarePane[destinationSquarePaneIndex]
-						.remove(outerTrackButtons[destinationSquareIndex]);
+						.removeAll();
+						//.remove(outerTrackButtons[destinationSquareIndex]);
 				transparentSquarePane[destinationSquarePaneIndex]
 						.add(yellowPawn[pawnNum - 4]);
 
@@ -1020,7 +1025,8 @@ public class SorryGame extends JApplet {
 			else if (destinationSquareIndex >= 62 && destinationSquareIndex < 67) {
 				destinationSquarePaneIndex = destinationSquareIndex - 62;
 				yellowSafetyZoneSquarePane[destinationSquarePaneIndex]
-						.remove(yellowSafetyZoneButtons[destinationSquarePaneIndex]);
+						.removeAll();
+						//.remove(yellowSafetyZoneButtons[destinationSquarePaneIndex]);
 				yellowSafetyZoneSquarePane[destinationSquarePaneIndex]
 						.add(yellowPawn[pawnNum - 4]);
 				
@@ -1039,7 +1045,7 @@ public class SorryGame extends JApplet {
 			else if (destinationSquareIndex == -1) {
 				destinationSquarePaneIndex = pawnNum - 4;
 				yellowStartSquarePane[destinationSquarePaneIndex].add(
-														yellowPawn[destinationSquarePaneIndex]);
+														yellowPawn[pawnNum - 4]);
 				successfulMove = true;
 			}
 			// cannot move yellow pawn to the red safety zone
@@ -1099,6 +1105,7 @@ public class SorryGame extends JApplet {
 			if ( Arrays.asList(yellowPawn).contains(e.getSource())) {
 				int pawnNum = Integer.parseInt(e.getActionCommand());
 				selectPawn(pawnNum);
+				setYellowPawnEnabled(false);
 				
 				if(SorryGame.debug) {
 					System.out.println("e.getActionCommand() = " + currentPawnIndex);
@@ -1521,14 +1528,13 @@ public class SorryGame extends JApplet {
 		displayCard(currentCard.getPictureName());
 
 		//check whether all red pawns are on start
-		boolean isAllPawnOnStart = true;
+		boolean isAllRedPawnOnStart = true;
 		for (int i = 0; i < 4; i++ ) {
 			if(board.pawns[i].getTrackIndex() != -1)
-				isAllPawnOnStart = false;
+				isAllRedPawnOnStart = false;
 		}
-		
 		//if all red paws are on start, if not card sorry, 1 or 2, computer's turn terminates without movements
-		if (isAllPawnOnStart && currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
+		if (isAllRedPawnOnStart && currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
 			try {
 				Thread.sleep(delayLength);
 			}
@@ -1538,6 +1544,35 @@ public class SorryGame extends JApplet {
 			clearCardDisplay();
 			return true;
 		}
+		
+		//check whether all red pawns are not on start
+		boolean isAnyRedPawnOnStart = false;
+		for(int i = 0; i < 4; i++) {
+			if(board.pawns[i].getTrackIndex() == -1) {
+				isAnyRedPawnOnStart = true;
+				break;
+			}
+		}
+		//check whether all yellow pawn are on start
+		boolean isAllYellowPawnOnStart = true;
+		for (int i = 4; i < 8; i++) {
+			if(board.pawns[i].getTrackIndex() != -1)
+				isAllYellowPawnOnStart = false;
+		}
+		//if all red pawns are not on start, or yellow pawns are all on start and the card is sorry, computer's turn terminates
+		if ((!isAnyRedPawnOnStart || isAllYellowPawnOnStart) && currentCard.getcardNum() == 0) {
+			try {
+				Thread.sleep(delayLength);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			clearCardDisplay();
+			return true;
+		}
+		
+		
+
 		
 		try {
 			Thread.sleep(delayLength);
@@ -1574,19 +1609,34 @@ public class SorryGame extends JApplet {
 		
 		//if a yellow pawn is bumped, move it back to start first
 		for (int i = 0; i < 4; i++) {
+
+			if(SorryGame.debug){
+				System.out.println("previousYellowPawnSquareIndex["+i+"] = "+previousYellowPawnSquareIndex[i]);
+				System.out.println("board.pawns["+(i+4)+"].getTrackIndex() = "+board.pawns[i+4].getTrackIndex());
+			}
 			if (board.pawns[i+4].getTrackIndex() != previousYellowPawnSquareIndex[i]) {
-				//if the yellow pawn is bumped back to start(= not switched places), move it to start first
-				if(currentCard.getcardNum() == 11)
 				//if the pawn is switched place, remove the red pawn from previous location first
+				if(currentCard.getcardNum() == 11) {
+					//remove the red pawn first
 					movePawn(currentPawnIndex, previousSquareIndex, -2);
-				
-				movePawn(board.pawns[i+4].id, previousYellowPawnSquareIndex[i], board.pawns[i+4].getTrackIndex());
-				
+					//move the yellow pawn to where the red pawn was
+					movePawn(board.pawns[i+4].id, previousYellowPawnSquareIndex[i], board.pawns[i+4].getTrackIndex());
+					//add the red pawn to destination
+					movePawn(currentPawnIndex, -2, board.pawns[currentPawnIndex].getTrackIndex());
+					return true;
+				}
+				else {
+					//move the yellow pawn to destination (start)				
+					movePawn(board.pawns[i+4].id, previousYellowPawnSquareIndex[i], board.pawns[i+4].getTrackIndex());
+					//move the red pawn to destination
+					movePawn(currentPawnIndex, previousSquareIndex, board.pawns[currentPawnIndex].getTrackIndex());
+					return true;
+				}
 			}
 		}
 		
 		//move the red pawn to destination without showing the sliding
-		movePawn(currentPawnIndex, -2, board.pawns[currentPawnIndex].getTrackIndex());
+		movePawn(currentPawnIndex, previousSquareIndex, board.pawns[currentPawnIndex].getTrackIndex());
 
 		//currentPawn = computer.selectPawn(board, currentCard);
 		//movePawn(currentPawn.getID(), computer.findMove(board, currentCard));
@@ -1639,17 +1689,18 @@ public class SorryGame extends JApplet {
 		do{}
 		while(!cardDrawn);
 		
-		//check whether all pawns are on start
-		boolean isAllPawnOnStart = true;
+		//check whether all yellow pawns are on start
+		boolean isAllYellowPawnOnStart = true;
 		for (int i = 4; i < 8; i++ ) {
 			if(SorryGame.debug) {
 				System.out.println("board.pawns[" + i +"].getTrackIndex() = "+board.pawns[i].getTrackIndex());
+				System.out.println("board.pawns["+i+"].onHome() = "+board.pawns[i].onHome);
 			}
 			if(board.pawns[i].getTrackIndex() != -1)
-				isAllPawnOnStart = false;
+				isAllYellowPawnOnStart = false;
 		}
 		//if all pawns are on start and the card is not sorry, 1 or 2, user's turn terminates
-		if (isAllPawnOnStart && currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
+		if (isAllYellowPawnOnStart && currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
 			
 			try {
 				Thread.sleep(delayLength);
@@ -1661,7 +1712,34 @@ public class SorryGame extends JApplet {
 			return true;
 		}
 		
-		//sets all pawns which are not on start enabled.
+		//check whether all yellow pawns are not on start
+		boolean isAnyYellowPawnOnStart = false;
+		for(int i = 4; i < 8; i++) {
+			if(board.pawns[i].getTrackIndex() == -1) {
+				isAnyYellowPawnOnStart = true;
+				break;
+			}
+		}
+		//check whether all red pawns are on start
+		boolean isAllRedPawnOnStart = true;
+		for (int i = 0; i < 4; i++) {
+			if(board.pawns[i].getTrackIndex() != -1)
+				isAllRedPawnOnStart = false;
+		}
+		//if all yellow pawns are not on start, or all red pawns are on start, and the card is sorry, user's turn terminates
+		if ((!isAnyYellowPawnOnStart || isAllRedPawnOnStart )&& currentCard.getcardNum() == 0) {
+			
+			try {
+				Thread.sleep(delayLength);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			clearCardDisplay();
+			return true;
+		}
+				
+		//sets proper pawns enabled.
 		setYellowPawnEnabled(true);
 
 		//wait for user to select a pawn
@@ -1696,6 +1774,9 @@ public class SorryGame extends JApplet {
 		int[] previousRedPawnSquareIndex = new int[4];
 		for (int i = 0; i < 4; i++) {
 			previousRedPawnSquareIndex[i] = board.pawns[i].getTrackIndex();
+			if(SorryGame.debug) {
+				System.out.println("board.pawns["+i+"].getTrackIndex() = "+previousRedPawnSquareIndex[i]);
+			}
 		}
 		
 		//move selected pawn to destination in both the gameBoard and the GUI
@@ -1703,10 +1784,41 @@ public class SorryGame extends JApplet {
 		
 		//if a red pawn is bumped or switched place with user's pawn, move it to the new location
 		for (int i = 0; i < 4; i++) {
-			if (board.pawns[i].getTrackIndex() != previousRedPawnSquareIndex[i])
-				movePawn(board.pawns[i].id, previousRedPawnSquareIndex[i], board.pawns[i].getTrackIndex());
+			if (board.pawns[i].getTrackIndex() != previousRedPawnSquareIndex[i]) {
+				//if the yellow pawn switched place with a red pawn
+				if(currentCard.getcardNum() == 11) {
+					//remove the yellow pawn first
+					movePawn(currentPawnIndex, previousSquareIndex, -2);
+					
+					try {
+						Thread.sleep(delayLength);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+					//move the red pawn to where the yellow pawn was
+					movePawn(board.pawns[i].id, -2, board.pawns[i].getTrackIndex());
+					
+					try {
+						Thread.sleep(delayLength);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					//add the yellow pawn to destination
+					movePawn(currentPawnIndex, -2, board.pawns[currentPawnIndex].getTrackIndex());
+					return true;
+				}
+				else {
+					//move the red pawn to start				
+					movePawn(board.pawns[i].id, -2, board.pawns[i].getTrackIndex());
+					//move the yellow pawn to destination
+					movePawn(currentPawnIndex, previousSquareIndex, board.pawns[currentPawnIndex].getTrackIndex());
+					return true;
+				}
+			}
 		}
 		
+		//did not bump any red pawn
 		movePawn(currentPawnIndex, previousSquareIndex, selectedSquareIndex);
 		
 		if (SorryGame.debug){
@@ -1728,7 +1840,9 @@ public class SorryGame extends JApplet {
 				System.out.println("pawn slided to the new location");
 			}			
 		}
-		
+		if (SorryGame.debug) {
+			System.out.println("board.hasWon(USER) = "+board.hasWon(USER));
+		}
 		//check if the user wins
 		if(board.hasWon(USER)) {
 		//if(true){
@@ -1793,8 +1907,7 @@ public class SorryGame extends JApplet {
 			}
 			
 		}
-
-		        
+    
 		try {
 			Thread.sleep(delayLength);
 		} catch (InterruptedException e) {
