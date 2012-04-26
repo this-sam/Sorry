@@ -391,7 +391,7 @@ public class SRGameBoard {
 		int min = 0;
 		
 		//swap them if it isn't
-		if (max < 0){
+		if (max < min){
 			int temp = max;
 			max = min;
 			min = temp;
@@ -404,6 +404,7 @@ public class SRGameBoard {
 		
 		//first find all possible moves on the normal track
 		for (int i=min;i < max; i++){
+			System.out.println(i);
 			regIndices[regIndicesCount] = (currIndex+(i))%SRGameBoard.trackLength;
 			
 			//modulo of negative numbers doesn't work how we want, so do it by hand.
