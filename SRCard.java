@@ -10,7 +10,8 @@ import java.util.Arrays;
 
 public class SRCard {
 	//override cardNum for testing
-	public int override = 1;
+	public boolean override = true;
+	public int overrideDist = -4;
 	
 	//The following methods will set both the cardNum and the pictureName.
 	public int cardNum;
@@ -23,8 +24,9 @@ public class SRCard {
 	
 	public SRCard(int cardNum) {
 		this.cardNum = cardNum;
-		if (override >= 0){
-			this.cardNum = override;
+		if (override){
+			this.cardNum = overrideDist;
+			cardNum = overrideDist;
 		}
 		
 		//sort out the images
@@ -83,9 +85,11 @@ public class SRCard {
 			rules = new SRRule [1];
 			rules[0] = new SRRule("SORRY");
 		}
-		//else {
+		else {
 		//	throw new Error("Uh oh... card number "+cardNum+ " does not exist!");
-		//}
+			rules = new SRRule [1];
+			rules[0] = new SRRule(cardNum);
+		}
 		
 	}
 	

@@ -19,8 +19,8 @@ import java.util.Random;
  */
 public class SRGameBoard {
 	//debug
-	private static boolean debug = false;
-	private static boolean pawnsStartHome = false;
+	private static boolean debug = true;
+	private static boolean pawnsStartHome = true;
 	
 	//constants
 	public static final int trackLength = 56;
@@ -98,13 +98,22 @@ public class SRGameBoard {
 			System.out.println("GameBoard initialized.");//for testing
 		}
 		
+		
 		if (SRGameBoard.pawnsStartHome){
 			for (int i=0; i<this.pawns.length;i++){
-				if (i!=0 && i!=5){
-					movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-1);
-				}
+				//if (i!=0 && i!=5){
+				movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-3);
+				//}
 			}
 		}
+//		
+//		if (SRGameBoard.pawnsStartHome){
+//			for (int i=0; i<this.pawns.length;i++){
+//				if (i!=0 && i!=5){
+//					movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-1);
+//				}
+//			}
+//		}
 		
 	}
 	//getters
@@ -154,6 +163,9 @@ public class SRGameBoard {
 		int numMoves = rule.numMoves;//change when card truly has "rules"
 		int [] moveIndices;
 		boolean canSplit = rule.canSplit;
+		if (SRGameBoard.debug){
+			System.out.println("Entered findMoves with rule.  NumMoves is "+numMoves);
+		}
 		
 		//figure out the direction of the pawn beforehand so we only need one loop (handles
 		//both - and + move directions.)
@@ -417,6 +429,9 @@ public class SRGameBoard {
 		int min = 0;
 		int max = 0 + numMoves;
 		if (numMoves < 0){
+			if (SRGameBoard.debug){
+				System.out.println("Switching direction for negative movement.");
+			}
 			int temp = min;
 			min = max;
 			max = temp;
@@ -446,7 +461,6 @@ public class SRGameBoard {
 				indiceCount++;
 			}
 		}
-
 		
 		return this.trimArray(safetyIndices, indiceCount); 
 	}
@@ -732,11 +746,14 @@ public class SRGameBoard {
 		int pawnIndex;
 		
 		//while (!gb.deck.isEmpty() && !gb.hasWon(0) && !gb.hasWon(1)){
-		for(int p=0;p<1000;p++){
+		for(int p=0;p<1;p++){
 			do{
 				pawnIndex = rand.nextInt(8);
+				pawnIndex = 4;
 				pawn = gb.pawns[pawnIndex];
 			}while(pawn.isOnHome());
+			
+			
 			
 			System.out.println("Moving pawn "+pawnIndex+" from "+pawn.getTrackIndex());
 			card = gb.deck.drawCard();
