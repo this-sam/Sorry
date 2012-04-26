@@ -1,9 +1,14 @@
+package src;
 /*
  * SRGUI.java
  * This class will handle all visual components and movements of images.
  * It is well separated from the game logic and interacts with SRGameBoard through SRDriver.
  * 
  */
+
+import SRCard;
+import SRGameBoard;
+import SRRule;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -57,8 +62,8 @@ public class SorryGame extends JApplet {
 	private GridLayout transparentSquarePaneLayout[] = new GridLayout[56];
 	private GridLayout redSafetyZoneSquarePaneLayout[] = new GridLayout[5];
 	private GridLayout yellowSafetyZoneSquarePaneLayout[] = new GridLayout[5];
-	private GroupLayout redStartSquarePaneLayout[] = new GroupLayout[4];
-	private GroupLayout yellowStartSquarePaneLayout[] = new GroupLayout[4];
+	//private GroupLayout redStartSquarePaneLayout[] = new GroupLayout[4];
+	//private GroupLayout yellowStartSquarePaneLayout[] = new GroupLayout[4];
 	private JPanel drawCardPane, displayCardPane;
 	private JButton drawCardBtn;
 	private JLabel displayCardLabel;
@@ -85,6 +90,7 @@ public class SorryGame extends JApplet {
 	
 	private SRGameBoard board;
 	private SRComputer computer;
+	private int isWinner;
 	// End of variables declaration
 
 
@@ -108,9 +114,12 @@ public class SorryGame extends JApplet {
 	 * Creates new form SRGUI
 	 */
 	public void playGame() {
+		//initialize the GUI components for the first time, only used once when the game first started
 		initComponents();
-		board = new SRGameBoard();  
-        /***************************************************************************************/
+		//create new gameBoard
+		board = new SRGameBoard();
+
+		//initialize the flow-controlling variables
  		//computerType = NICE_COMPUTER;
 		started = false;
  		pawnSelected = false;
@@ -121,6 +130,7 @@ public class SorryGame extends JApplet {
  		selectedSquareIndex = -2;
         
  		boolean continued = false;
+		isWinner = -1;
  		/***************************************************************************************/
         
         //the default first player is the user
@@ -129,8 +139,10 @@ public class SorryGame extends JApplet {
   		
   		computer = new SRComputer();
   		
+  		//wait for the user to choose the computer type, sets true if niceComputerBtn or meanComputerBtn pressed
   		do{}
   		while(!started);
+  		
   		/*//initialize the computer type based on the user input
   		if (gameGUI.getComputerType() == NICE_COMPUTER) {
   			currentComp = new SRNiceComputer();
@@ -141,37 +153,40 @@ public class SorryGame extends JApplet {
   		
   		//if not won, take turns to play the game
   		do {
-  			//System.out.println("new card drawn");
   			
   			if (currentPlayer == COMPUTER) {
-  				  				
-  				computerPlay();
-  				if (currentCard.getcardNum() == 2)
+  				
+  				//no matter whether computer makes moves, if has not won, continued is always true
+  				continued = computerPlay();
+  				
+  				//if card 2, second turn
+  				if (continued && currentCard.getcardNum() == 2)
   					continued = computerPlay();
+  				
+  				//switch player
   				currentPlayer = USER;
   			}
   			else if (currentPlayer == USER) {
-  				
-  				//System.out.println("computer played");
+  				//no matter whether user makes moves, if has not won, continued is always true
   				continued = userPlay();
-  				//for (int i=0;i<card.rules.length; i++){
-  				//	if card.rules[i].numTurns > 1
-  				//		userPlay()
-  				//}
-  				if (currentCard.getcardNum() == 2)
+  				
+  				//if card 2, second turn
+  				if (continued && currentCard.getcardNum() == 2)
   					continued = userPlay();
   				
+  				//switch player
   				currentPlayer = COMPUTER;
   			}
+  			
   			try {
   				Thread.sleep(delayLength);
   			} catch (InterruptedException e) {
   				e.printStackTrace();
   			}
 
-  		} while(continued && !board.hasWon(currentPlayer));
-  		
-  		showCongratulationDialog();
+  		} while(continued && isWinner < 0);
+  		  			
+  		endGame();
 	}
 
 	/**
@@ -209,7 +224,7 @@ public class SorryGame extends JApplet {
 		startNewGameBtn = new JButton();
 		startNewGameBtn.setFont(new Font("Comic Sans MS", 0, 12));
 		startNewGameBtn.setText("Start a new game");
-		startNewGameBtn.setActionCommand("start");
+		startNewGameBtn.setActionCommand("start_0");
 		startNewGameBtn.setMaximumSize(new Dimension(150, 35));
 		startNewGameBtn.setMinimumSize(new Dimension(150, 35));
 		startNewGameBtn.setPreferredSize(new Dimension(150, 35));
@@ -545,31 +560,9 @@ public class SorryGame extends JApplet {
 		for (int i = 0; i < 4; i++) {
 			redStartSquarePane[i] = new JPanel();
 			redStartSquarePane[i].setOpaque(false);
-			redStartSquarePaneLayout[i] = new GroupLayout(redStartSquarePane[i]);
-			redStartSquarePane[i].setLayout(redStartSquarePaneLayout[i]);
-			redStartSquarePaneLayout[i]
-					.setHorizontalGroup(redStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									redStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(redPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-			redStartSquarePaneLayout[i]
-					.setVerticalGroup(redStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									redStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(redPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-
+			redStartSquarePane[i].setLayout(new GridLayout());
+			redStartSquarePane[i].add(redPawn[i]);
+			
 			redStartPane.add(redStartSquarePane[i]);
 		}
 		/***************************************************************************************/
@@ -632,32 +625,9 @@ public class SorryGame extends JApplet {
 		for (int i = 0; i < 4; i++) {
 			yellowStartSquarePane[i] = new JPanel();
 			yellowStartSquarePane[i].setOpaque(false);
-			yellowStartSquarePaneLayout[i] = new GroupLayout(
-					yellowStartSquarePane[i]);
-			yellowStartSquarePane[i].setLayout(yellowStartSquarePaneLayout[i]);
-			yellowStartSquarePaneLayout[i]
-					.setHorizontalGroup(yellowStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									yellowStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(yellowPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-			yellowStartSquarePaneLayout[i]
-					.setVerticalGroup(yellowStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									yellowStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(yellowPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-
+			yellowStartSquarePane[i].setLayout(new GridLayout());
+			yellowStartSquarePane[i].add(yellowPawn[i]);
+			
 			yellowStartPane.add(yellowStartSquarePane[i]);
 		}
 		/***************************************************************************************/
@@ -728,6 +698,7 @@ public class SorryGame extends JApplet {
 		drawCardPane.setMinimumSize(new java.awt.Dimension(90, 125));
 		drawCardPane.setPreferredSize(new java.awt.Dimension(90, 125));
 		drawCardPane.setBounds(150, 280, 90, 125);
+		drawCardPane.setOpaque(false);
 		gameBoardLayeredPane.add(drawCardPane, JLayeredPane.MODAL_LAYER);
 		// create the drawCardBtn for drawing a card
 		drawCardBtn.setIcon(new ImageIcon("C:/Users/xsong/Sorry/drawACard.jpg"));
@@ -791,592 +762,6 @@ public class SorryGame extends JApplet {
 	}// end of initComponents()
 
 
-	public void resetComponents() {
-		// set up the frame
-		//frame = new JFrame();
-		//setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		/*setVisible(true);
-		setName("SORRY! Game - SB, CC, TK, YZ Group - CS205 Final Project");
-		setFont(new Font("Comic Sans MS", 0, 12));
-		setPreferredSize(new Dimension(781, 580));*/
-		/***************************************************************************************/
-
-		// create author information.
-		// It's not displayed in current window, because the window has to fit
-		// the 800*600 screen.
-		/*authorNameLabel.setFont(new Font("Comic Sans MS", 0, 12));
-		authorNameLabel.setText("SORRY! Game - SB, CC, TK, YZ");
-		authorNameLabel.setVerticalTextPosition(SwingConstants.BOTTOM);*/
-		/***************************************************************************************/
-
-		// create text field for displaying tooltip or help information
-		/*infoAreaPane = new JScrollPane();
-		infoAreaPane.setPreferredSize(new Dimension(200, 400));
-		infoArea.setColumns(10);
-		infoArea.setRows(5);
-		infoAreaPane.setViewportView(infoArea);*/
-		/***************************************************************************************/
-
-		// create the button for starting a new game
-		/*startNewGameBtn.setFont(new Font("Comic Sans MS", 0, 12));
-		startNewGameBtn.setText("Start a new game");
-		startNewGameBtn.setActionCommand("start");
-		startNewGameBtn.setMaximumSize(new Dimension(150, 35));
-		startNewGameBtn.setMinimumSize(new Dimension(150, 35));
-		startNewGameBtn.setPreferredSize(new Dimension(150, 35));
-		startNewGameBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				startNewGameBtnActionPerformed(evt);
-			}
-		});*/
-		/***************************************************************************************/
-
-		// create the button for quiting the game
-		/*quitBtn.setFont(new Font("Comic Sans MS", 0, 12));
-		quitBtn.setText("Quit");
-		quitBtn.setActionCommand("quit");
-		quitBtn.setMaximumSize(new Dimension(80, 35));
-		quitBtn.setMinimumSize(new Dimension(80, 35));
-		quitBtn.setPreferredSize(new Dimension(80, 35));
-		quitBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				quitBtnActionPerformed(evt);
-			}
-		});*/
-		/***************************************************************************************/
-
-		//create the button for checking statistics
-		/*statisticsBtn.setFont(new Font("Comic Sans MS", 0, 12));
-        statisticsBtn.setText("Statistics");
-        statisticsBtn.setActionCommand("statistics");
-        statisticsBtn.setMaximumSize(new java.awt.Dimension(90, 35));
-        statisticsBtn.setMinimumSize(new java.awt.Dimension(90, 35));
-        statisticsBtn.setPreferredSize(new java.awt.Dimension(90, 35));
-        statisticsBtn.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent evt) {
-        		statisticsBtnActionPerformed(evt);
-        	}
-        });*/
-		/***************************************************************************************/
-		/*
-        computerTypeChoicePane.setBorder(BorderFactory.createTitledBorder(null, "Choose computer type", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Comic Sans MS", 0, 10)));
-
-        computerTypeQuestionLabel.setFont(new Font("Comic Sans MS", 0, 12)); 
-        computerTypeQuestionLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        computerTypeQuestionLabel.setText("<html>Which type of computer you want to chanllenge?<html>");
-        
-        niceComputerBtn.setFont(new Font("Comic Sans MS", 0, 12));
-        niceComputerBtn.setText("Nice");
-        niceComputerBtn.setToolTipText("Click to choose a nice computer");
-        niceComputerBtn.setActionCommand("0");
-        niceComputerBtn.setPreferredSize(new java.awt.Dimension(61, 27));
-        niceComputerBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                niceComputerBtnActionPerformed(evt);
-            }
-        });
-        niceComputerBtn.setEnabled(false);
-        
-        meanComputerBtn.setFont(new Font("Comic Sans MS", 0, 12));
-        meanComputerBtn.setText("Mean");
-        meanComputerBtn.setToolTipText("Click to choose a mean computer");
-        meanComputerBtn.setActionCommand("1");
-        meanComputerBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                meanComputerBtnActionPerformed(evt);
-            }
-        });
-        meanComputerBtn.setEnabled(false);
-        
-        GroupLayout computerTypeChoicePaneLayout = new GroupLayout(computerTypeChoicePane);
-        computerTypeChoicePane.setLayout(computerTypeChoicePaneLayout);
-        computerTypeChoicePaneLayout.setHorizontalGroup(
-            computerTypeChoicePaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(computerTypeChoicePaneLayout.createSequentialGroup()
-                .addGroup(computerTypeChoicePaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(computerTypeChoicePaneLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(niceComputerBtn)
-                        .addGap(18, 18, 18)
-                        .addComponent(meanComputerBtn))
-                    .addGroup(computerTypeChoicePaneLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(computerTypeQuestionLabel, GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        computerTypeChoicePaneLayout.setVerticalGroup(
-            computerTypeChoicePaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(computerTypeChoicePaneLayout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(computerTypeQuestionLabel, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(computerTypeChoicePaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(niceComputerBtn)
-                    .addComponent(meanComputerBtn))
-                .addContainerGap(20, Short.MAX_VALUE))
-        );*/
-		/***************************************************************************************/
-		/*
-        // central layered panel holds the game board picture and all components
-		gameBoardLayeredPane.setPreferredSize(new Dimension(525, 525));
-
-		// set up the game board image as the background
-		gameBoardImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		gameBoardImageLabel.setIcon(new ImageIcon("C:/Users/xsong/Sorry/SRgameBoardImage.jpg")); // NOI18N
-		gameBoardImageLabel.setPreferredSize(new Dimension(525, 525));
-		gameBoardImageLabel.setBounds(0, 0, 525, 525);
-		gameBoardLayeredPane.add(gameBoardImageLabel,
-				JLayeredPane.DEFAULT_LAYER);
-		/***************************************************************************************/
-		/*
-		// the panel holds all track squares with transparent buttons
-		transparentButtonPane.setBounds(0, 0, 525, 525);
-		gameBoardLayeredPane.add(transparentButtonPane,
-				JLayeredPane.PALETTE_LAYER);
-		transparentButtonPane.setOpaque(false);
-		transparentButtonPane.setLayout(new GridLayout(0, 15));
-		for (int i = 0; i < 225; i++) {
-			transparentSquarePane[i].setOpaque(false);
-			// transparentSquarePane[i].setBorder(BorderFactory.createRaisedBevelBorder());
-			transparentButtonPane.add(transparentSquarePane[i]);
-		}
-		/***************************************************************************************/
-		
-		// set up buttons on outer track.
-		/*for (int i = 0; i < 56; i++) {
-			outerTrackButtons[i].setOpaque(false);
-			outerTrackButtons[i].setMaximumSize(new Dimension(35, 35));
-			outerTrackButtons[i].setMinimumSize(new Dimension(35, 35));
-			outerTrackButtons[i].setPreferredSize(new Dimension(35, 35));
-			outerTrackButtons[i].setActionCommand("" + i);
-			outerTrackButtons[i].addActionListener(new SquareButtonListener());
-			outerTrackButtons[i].setEnabled(false);
-		}*/
-		for (int i = 0; i < 15; i++) {
-			//transparentSquarePane[i].setLayout(transparentSquarePaneLayout[i]);
-			transparentSquarePane[i].add(outerTrackButtons[i]);
-			outerTrackPaneIndex[i] = i;
-		}
-		for (int i = 15, j = 29; i < 29 && j < 225; i++, j += 15) {
-			//transparentSquarePane[j].setLayout(transparentSquarePaneLayout[i]);
-			transparentSquarePane[j].add(outerTrackButtons[i]);
-			outerTrackPaneIndex[i] = j;
-		}
-		for (int i = 29, j = 223; i < 43 && j > 209; i++, j--) {
-			//transparentSquarePane[j].setLayout(transparentSquarePaneLayout[i]);
-			transparentSquarePane[j].add(outerTrackButtons[i]);
-			outerTrackPaneIndex[i] = j;
-		}
-		for (int i = 43, j = 195; i < 56 && j > 14; i++, j -= 15) {
-			//transparentSquarePane[j].setLayout(transparentSquarePaneLayout[i]);
-			transparentSquarePane[j].add(outerTrackButtons[i]);
-			outerTrackPaneIndex[i] = j;
-		}
-		// end of creating outer track buttons
-		/***************************************************************************************/
-
-		// set the layout for the frame, add and align all the components.
-		/*GroupLayout layout = new GroupLayout(getContentPane());
-		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(
-						layout.createSequentialGroup()
-								.addContainerGap(
-										javax.swing.GroupLayout.DEFAULT_SIZE,
-										Short.MAX_VALUE)
-								.addGroup(
-										layout.createParallelGroup(
-												GroupLayout.Alignment.LEADING)
-												.addGroup(
-														GroupLayout.Alignment.TRAILING,
-														layout.createSequentialGroup()
-																.addComponent(
-																		authorNameLabel,
-																		GroupLayout.PREFERRED_SIZE,
-																		185,
-																		GroupLayout.PREFERRED_SIZE)
-																.addGap(286,
-																		286,
-																		286))
-												.addGroup(
-														GroupLayout.Alignment.TRAILING,
-														layout.createSequentialGroup()
-																.addComponent(
-																		gameBoardLayeredPane,
-																		GroupLayout.PREFERRED_SIZE,
-																		525,
-																		GroupLayout.PREFERRED_SIZE)
-																.addGroup(
-																		layout.createParallelGroup(
-																				GroupLayout.Alignment.LEADING)
-																				.addGroup(
-																						layout.createSequentialGroup()
-																								.addPreferredGap(
-																										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-																								.addComponent(
-																										infoAreaPane,
-																										GroupLayout.PREFERRED_SIZE,
-																										200,
-																										GroupLayout.PREFERRED_SIZE))
-																				.addGroup(
-																						layout.createSequentialGroup()
-																								.addGap(64,
-																										64,
-																										64)
-																								.addComponent(
-																										quitBtn,
-																										GroupLayout.PREFERRED_SIZE,
-																										80,
-																										GroupLayout.PREFERRED_SIZE))
-																				.addGroup(
-																						layout.createSequentialGroup()
-																								.addGap(53,
-																										53,
-																										53)
-																                                .addComponent(
-																                                		statisticsBtn, 
-																                                		GroupLayout.PREFERRED_SIZE, 
-																                                		100,		
-																                                		GroupLayout.PREFERRED_SIZE))
-																                .addGroup(
-																						layout.createSequentialGroup()
-																								.addGap(30,
-																										30,
-																										30)
-																								.addComponent(
-																										startNewGameBtn,
-																										GroupLayout.PREFERRED_SIZE,
-																										150,
-																										GroupLayout.PREFERRED_SIZE))
-													                            .addGroup(
-													                            		layout.createSequentialGroup()
-													                            				.addGap(8, 8, 8)
-													                            				.addComponent(computerTypeChoicePane, 
-													                            						GroupLayout.PREFERRED_SIZE, 
-													                            						190, 
-													                            						GroupLayout.PREFERRED_SIZE)
-													                            				.addContainerGap())))
-																.addGap(22, 22, 22))));
-		layout.setVerticalGroup(layout
-				.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(
-						layout.createSequentialGroup()
-								.addComponent(authorNameLabel,
-										javax.swing.GroupLayout.PREFERRED_SIZE,
-										0,
-										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.LEADING)
-												.addGroup(
-														layout.createSequentialGroup()
-																.addComponent(
-																		infoAreaPane,
-																		GroupLayout.PREFERRED_SIZE,
-																		150,
-																		GroupLayout.PREFERRED_SIZE)
-																.addGap(18, 18,
-																		18)
-																.addComponent(
-																		quitBtn,
-																		GroupLayout.PREFERRED_SIZE,
-																		35,
-																		GroupLayout.PREFERRED_SIZE)
-																.addGap(18, 18,
-																		18)
-																.addComponent(
-																		statisticsBtn,
-																		GroupLayout.PREFERRED_SIZE, 
-																		35, 
-																		GroupLayout.PREFERRED_SIZE)
-																.addGap(18, 18,
-																		18)
-																.addComponent(
-																		startNewGameBtn,
-																		GroupLayout.PREFERRED_SIZE,
-																		35,
-																		GroupLayout.PREFERRED_SIZE)
-																.addGap(30, 30,
-																		30)
-																.addComponent(
-																		computerTypeChoicePane, 
-																		GroupLayout.PREFERRED_SIZE, 
-																		GroupLayout.DEFAULT_SIZE, 
-																		GroupLayout.PREFERRED_SIZE))
-																.addComponent(
-																		gameBoardLayeredPane,
-																		javax.swing.GroupLayout.PREFERRED_SIZE,
-																		525,
-																		javax.swing.GroupLayout.PREFERRED_SIZE)
-																.addGap(30, 30, 30))
-								.addContainerGap(0, Short.MAX_VALUE)));
-		/***************************************************************************************/
-		/* end of setting up main components */
-		/***************************************************************************************/
-
-		// set up the red pawns
-		for (int i = 0; i < 4; i++) {
-			redPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg")); // NOI18N
-			redPawn[i].setActionCommand("" + i);
-			redPawn[i].setDisabledIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg"));
-			redPawn[i].setMaximumSize(new Dimension(35, 35));
-			redPawn[i].setMinimumSize(new Dimension(35, 35));
-			redPawn[i].setPreferredSize(new Dimension(35, 35));
-		}
-		/***************************************************************************************/
-
-		/*
-		// set up the start panel for the red player
-		redStartPane.setMaximumSize(new Dimension(70, 70));
-		redStartPane.setMinimumSize(new Dimension(70, 70));
-		redStartPane.setOpaque(false);
-		redStartPane.setPreferredSize(new Dimension(70, 70));
-		redStartPane.setLayout(new GridLayout(0, 2));
-		redStartPane.setBounds(122, 45, 70, 70);
-		gameBoardLayeredPane.add(redStartPane, JLayeredPane.MODAL_LAYER);
-		for (int i = 0; i < 4; i++) {
-			redStartSquarePane[i].setOpaque(false);
-			redStartSquarePaneLayout[i] = new GroupLayout(redStartSquarePane[i]);
-			redStartSquarePane[i].setLayout(redStartSquarePaneLayout[i]);
-			redStartSquarePaneLayout[i]
-					.setHorizontalGroup(redStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									redStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(redPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-			redStartSquarePaneLayout[i]
-					.setVerticalGroup(redStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									redStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(redPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-
-			redStartPane.add(redStartSquarePane[i]);
-		}
-		/***************************************************************************************/
-
-		/*
-		// set up the home panel for the red player
-		redHomePane.setOpaque(false);
-		redHomePane.setLayout(new FlowLayout(FlowLayout.CENTER));
-		redHomePane.setBounds(50, 190, 90, 90);
-		gameBoardLayeredPane.add(redHomePane, JLayeredPane.MODAL_LAYER);
-		/***************************************************************************************/
-
-		/*
-		// set up the safety zone panel for the red player
-		redSafetyZonePane.setMaximumSize(new Dimension(35, 165));
-		redSafetyZonePane.setMinimumSize(new Dimension(35, 165));
-		redSafetyZonePane.setOpaque(false);
-		redSafetyZonePane.setLayout(new GridLayout(0, 1));
-		redSafetyZonePane.setBounds(70, 35, 35, 165);
-		gameBoardLayeredPane.add(redSafetyZonePane, JLayeredPane.MODAL_LAYER);
-		// set up the red safety zone squares
-		for (int i = 0; i < 5; i++) {
-			redSafetyZoneSquarePane[i].setMaximumSize(new Dimension(35, 35));
-			redSafetyZoneSquarePane[i].setMinimumSize(new Dimension(35, 35));
-			redSafetyZoneSquarePane[i].setOpaque(false);
-			redSafetyZoneSquarePane[i].setPreferredSize(new Dimension(35, 35));
-
-			redSafetyZoneSquarePane[i].setLayout(redSafetyZoneSquarePaneLayout[i]);
-
-			redSafetyZonePane.add(redSafetyZoneSquarePane[i]);
-		}
-		/***************************************************************************************/
-		/* end of setting up components specific for red pawns */
-		/***************************************************************************************/
-
-		// set up the yellow pawns
-		for (int i = 0; i < 4; i++) {
-			yellowPawn[i].setIcon(new javax.swing.ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg")); // NOI18N
-			yellowPawn[i].setActionCommand("" + (4 + i));
-			yellowPawn[i].setDisabledIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
-			yellowPawn[i].setMaximumSize(new java.awt.Dimension(35, 35));
-			yellowPawn[i].setMinimumSize(new java.awt.Dimension(35, 35));
-			yellowPawn[i].setPreferredSize(new java.awt.Dimension(35, 35));
-			yellowPawn[i].addActionListener(new PawnButtonListener());
-		}
-		/***************************************************************************************/
-
-		
-		// set up the start panel for the yellow player
-		yellowStartPane.setMaximumSize(new Dimension(70, 70));
-		yellowStartPane.setMinimumSize(new Dimension(70, 70));
-		yellowStartPane.setOpaque(false);
-		yellowStartPane.setPreferredSize(new Dimension(70, 70));
-		yellowStartPane.setLayout(new GridLayout(0, 2));
-		yellowStartPane.setBounds(330, 410, 70, 70);
-		gameBoardLayeredPane.add(yellowStartPane, JLayeredPane.MODAL_LAYER);
-		for (int i = 0; i < 4; i++) {
-			yellowStartSquarePane[i].setOpaque(false);
-			//yellowStartSquarePaneLayout[i] = new GroupLayout(
-			//		yellowStartSquarePane[i]);
-			//yellowStartSquarePane[i].setLayout(yellowStartSquarePaneLayout[i]);
-			yellowStartSquarePaneLayout[i]
-					.setHorizontalGroup(yellowStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									yellowStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(yellowPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-			yellowStartSquarePaneLayout[i]
-					.setVerticalGroup(yellowStartSquarePaneLayout[i]
-							.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									yellowStartSquarePaneLayout[i]
-											.createSequentialGroup()
-											.addComponent(yellowPawn[i],
-													GroupLayout.PREFERRED_SIZE,
-													GroupLayout.DEFAULT_SIZE,
-													GroupLayout.PREFERRED_SIZE)
-											.addGap(0, 0, Short.MAX_VALUE)));
-
-			//yellowStartPane.add(yellowStartSquarePane[i]);
-		}
-		/***************************************************************************************/
-
-		// set up the home panel for the yellow player
-		yellowHomePane.setOpaque(false);
-		yellowHomePane.setLayout(new FlowLayout(FlowLayout.CENTER));
-		yellowHomePane.setBounds(390, 240, 90, 90);
-		//gameBoardLayeredPane.add(yellowHomePane, JLayeredPane.MODAL_LAYER);
-
-		yellowHomeButton.setOpaque(false);
-		yellowHomeButton.setMaximumSize(new Dimension(35, 35));
-		yellowHomeButton.setMinimumSize(new Dimension(35, 35));
-		yellowHomeButton.setPreferredSize(new Dimension(35, 35));
-		yellowHomeButton.setActionCommand("" + 67); // track square index
-		//yellowHomeButton.addActionListener(new SquareButtonListener());
-		yellowHomeButton.setEnabled(false);
-		/***************************************************************************************/
-
-		/*
-		// set up the safety zone panel for the yellow player
-		yellowSafetyZonePane.setMaximumSize(new Dimension(35, 165));
-		yellowSafetyZonePane.setMinimumSize(new Dimension(35, 165));
-		yellowSafetyZonePane.setOpaque(false);
-		yellowSafetyZonePane.setLayout(new GridLayout(0, 1));
-		yellowSafetyZonePane.setBounds(420, 325, 35, 165);
-		gameBoardLayeredPane
-				.add(yellowSafetyZonePane, JLayeredPane.MODAL_LAYER);
-		// Set up the yellow safety zone squares
-		for (int i = 4; i >= 0; i--) {
-			yellowSafetyZoneSquarePane[i] = new JPanel();
-			yellowSafetyZoneSquarePane[i].setMaximumSize(new Dimension(35, 35));
-			yellowSafetyZoneSquarePane[i].setMinimumSize(new Dimension(35, 35));
-			yellowSafetyZoneSquarePane[i].setOpaque(false);
-			yellowSafetyZoneSquarePane[i]
-					.setPreferredSize(new Dimension(35, 35));
-
-			yellowSafetyZoneSquarePaneLayout[i] = new GridLayout();
-			yellowSafetyZoneSquarePane[i].setLayout(yellowSafetyZoneSquarePaneLayout[i]);
-
-			yellowSafetyZonePane.add(yellowSafetyZoneSquarePane[i]);
-		}
-		// set up the safety zone buttons for the yellow player
-		for (int i = 0; i < 5; i++) {
-			yellowSafetyZoneButtons[i] = new JButton();
-			yellowSafetyZoneButtons[i].setOpaque(false);
-			yellowSafetyZoneButtons[i].setMaximumSize(new Dimension(35, 35));
-			yellowSafetyZoneButtons[i].setMinimumSize(new Dimension(35, 35));
-			yellowSafetyZoneButtons[i].setPreferredSize(new Dimension(35, 35));
-			yellowSafetyZoneButtons[i].setActionCommand("" + (i + 62));
-			yellowSafetyZoneButtons[i]
-					.addActionListener(new SquareButtonListener());
-			yellowSafetyZoneButtons[i].setEnabled(false);
-		}
-		for (int i = 0; i < 5; i++) {
-			yellowSafetyZoneSquarePane[i].add(yellowSafetyZoneButtons[i]);
-		}
-		/***************************************************************************************/
-		/* end of setting up components specific for yellow pawns */
-		/***************************************************************************************/
-
-		/*
-		// set up the panel for displaying the draw_a_card button
-		drawCardPane.setMinimumSize(new java.awt.Dimension(90, 125));
-		drawCardPane.setPreferredSize(new java.awt.Dimension(90, 125));
-		drawCardPane.setBounds(150, 280, 90, 125);
-		gameBoardLayeredPane.add(drawCardPane, JLayeredPane.MODAL_LAYER);
-		// create the drawCardBtn for drawing a card
-		drawCardBtn.setIcon(new ImageIcon("C:/Users/xsong/Sorry/drawACard.jpg"));
-		drawCardBtn.setToolTipText("Click to draw a card.");
-		drawCardBtn.setHorizontalTextPosition(SwingConstants.CENTER);
-		drawCardBtn.setMaximumSize(new Dimension(90, 125));
-		drawCardBtn.setMinimumSize(new Dimension(90, 125));
-		drawCardBtn.setPreferredSize(new Dimension(90, 125));
-		drawCardBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				drawCardBtnActionPerformed(evt);
-			}
-		});
-		// set up the layout of drawCardPane and add the button into the pane
-		GroupLayout drawCardPaneLayout = new GroupLayout(drawCardPane);
-		drawCardPane.setLayout(drawCardPaneLayout);
-		drawCardPaneLayout.setHorizontalGroup(drawCardPaneLayout
-				.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(
-						drawCardPaneLayout
-								.createSequentialGroup()
-								.addComponent(drawCardBtn,
-										GroupLayout.PREFERRED_SIZE, 90,
-										GroupLayout.PREFERRED_SIZE)
-								.addGap(0, 0, Short.MAX_VALUE)));
-		drawCardPaneLayout.setVerticalGroup(drawCardPaneLayout
-				.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(
-						drawCardPaneLayout
-								.createSequentialGroup()
-								.addComponent(drawCardBtn,
-										GroupLayout.PREFERRED_SIZE, 125,
-										GroupLayout.PREFERRED_SIZE)
-								.addGap(0, 0, Short.MAX_VALUE)));
-		/***************************************************************************************/
-
-		/*
-		// set up the label and panel for displaying the newly drawn card.
-		displayCardPane.setBounds(270, 100, 120, 164);
-		displayCardPane.setOpaque(false);
-		gameBoardLayeredPane.add(displayCardPane, JLayeredPane.MODAL_LAYER);
-		currentCardImage = "";
-		displayCardLabel
-				.setToolTipText("This is the card displaying the moves and rules");
-		displayCardLabel.setMaximumSize(new Dimension(120, 164));
-		displayCardLabel.setMinimumSize(new Dimension(120, 164));
-		displayCardLabel.setPreferredSize(new Dimension(120, 164));
-		displayCardLabel.setOpaque(false);
-		GroupLayout displayCardPaneLayout = new GroupLayout(displayCardPane);
-		displayCardPane.setLayout(displayCardPaneLayout);
-		displayCardPaneLayout.setHorizontalGroup(displayCardPaneLayout
-				.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addComponent(displayCardLabel, GroupLayout.DEFAULT_SIZE, 120,
-						Short.MAX_VALUE));
-		displayCardPaneLayout.setVerticalGroup(displayCardPaneLayout
-				.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addComponent(displayCardLabel, GroupLayout.DEFAULT_SIZE, 164,
-						Short.MAX_VALUE));
-		/***************************************************************************************/
-
-		//pack();
-		
-	}
-	
-	
 	/**
 	 * This method lights up the possible destination squares with orange. If
 	 * the square is occupied by a pawn (should not be a yellow pawn because the
@@ -1457,7 +842,7 @@ public class SorryGame extends JApplet {
 			}
 		}
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of squareLightUp()
 
 	/**
@@ -1539,6 +924,7 @@ public class SorryGame extends JApplet {
 			}
 			// move red pawn to its home
 			else if (destinationSquareIndex == 61) {
+				board.pawns[pawnNum].setOnHome(true);
 				redHomePane.add(redPawn[pawnNum]);
 				redPawn[pawnNum].setEnabled(false);
 				successfulMove = true;
@@ -1546,39 +932,15 @@ public class SorryGame extends JApplet {
 			// move red pawn back to start
 			else if (destinationSquareIndex == -1) {
 				destinationSquarePaneIndex = pawnNum;
-				redStartSquarePaneLayout[destinationSquarePaneIndex]
-						.setHorizontalGroup(redStartSquarePaneLayout[destinationSquarePaneIndex]
-								.createParallelGroup(
-										GroupLayout.Alignment.LEADING)
-								.addGroup(
-										redStartSquarePaneLayout[destinationSquarePaneIndex]
-												.createSequentialGroup()
-												.addComponent(
-														redPawn[destinationSquarePaneIndex],
-														GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE,
-														GroupLayout.PREFERRED_SIZE)
-												.addGap(0, 0, Short.MAX_VALUE)));
-				redStartSquarePaneLayout[destinationSquarePaneIndex]
-						.setVerticalGroup(redStartSquarePaneLayout[destinationSquarePaneIndex]
-								.createParallelGroup(
-										GroupLayout.Alignment.LEADING)
-								.addGroup(
-										redStartSquarePaneLayout[destinationSquarePaneIndex]
-												.createSequentialGroup()
-												.addComponent(
-														redPawn[destinationSquarePaneIndex],
-														GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE,
-														GroupLayout.PREFERRED_SIZE)
-												.addGap(0, 0, Short.MAX_VALUE)));
+				redStartSquarePane[destinationSquarePaneIndex].add(
+														redPawn[destinationSquarePaneIndex]);
 				successfulMove = true;
 			}
 			// cannot move red pawn to the yellow safety zone or yellow home.
 			// Debug/test tool.
 			else {
 				System.out
-						.println("ERROR: Red pawn can not move to the designated square!!!");
+						.println("red pawn has been removed from previous location");
 				successfulMove = false;
 			}
 			// end of adding a red pawn to the destination square
@@ -1643,6 +1005,10 @@ public class SorryGame extends JApplet {
 			// move the pawn to a square on the outer track
 			if (destinationSquareIndex >= 0 && destinationSquareIndex < 56) {
 				destinationSquarePaneIndex = outerTrackPaneIndex[destinationSquareIndex];
+				
+				if (SorryGame.debug) {
+					System.out.println("destinationSquarePaneIndex is " + destinationSquarePaneIndex);
+				}
 				transparentSquarePane[destinationSquarePaneIndex]
 						.remove(outerTrackButtons[destinationSquareIndex]);
 				transparentSquarePane[destinationSquarePaneIndex]
@@ -1672,38 +1038,14 @@ public class SorryGame extends JApplet {
 			// move yellow pawn back to start
 			else if (destinationSquareIndex == -1) {
 				destinationSquarePaneIndex = pawnNum - 4;
-				yellowStartSquarePaneLayout[destinationSquarePaneIndex]
-						.setHorizontalGroup(yellowStartSquarePaneLayout[destinationSquarePaneIndex]
-								.createParallelGroup(
-										GroupLayout.Alignment.LEADING)
-								.addGroup(
-										yellowStartSquarePaneLayout[destinationSquarePaneIndex]
-												.createSequentialGroup()
-												.addComponent(
-														yellowPawn[destinationSquarePaneIndex],
-														GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE,
-														GroupLayout.PREFERRED_SIZE)
-												.addGap(0, 0, Short.MAX_VALUE)));
-				yellowStartSquarePaneLayout[destinationSquarePaneIndex]
-						.setVerticalGroup(yellowStartSquarePaneLayout[destinationSquarePaneIndex]
-								.createParallelGroup(
-										GroupLayout.Alignment.LEADING)
-								.addGroup(
-										yellowStartSquarePaneLayout[destinationSquarePaneIndex]
-												.createSequentialGroup()
-												.addComponent(
-														yellowPawn[destinationSquarePaneIndex],
-														GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE,
-														GroupLayout.PREFERRED_SIZE)
-												.addGap(0, 0, Short.MAX_VALUE)));
+				yellowStartSquarePane[destinationSquarePaneIndex].add(
+														yellowPawn[destinationSquarePaneIndex]);
 				successfulMove = true;
 			}
 			// cannot move yellow pawn to the red safety zone
 			else {
 				System.out
-						.println("ERROR: Yellow pawn can not move to the designated square!!!");
+						.println("yellow pawn has been removed from previous location");
 				successfulMove = false;
 			}// end of adding the yellow pawn to the destination square
 
@@ -1718,10 +1060,25 @@ public class SorryGame extends JApplet {
 
 		clearTrack();
 		repaint();
-		//revalidate();
 		
 	}// end of movePawn()
 
+	
+	public void bumpPawnToStart(int pawnNum, 
+						 int bumpedPawnNum, 
+						 int previousSquareIndex, 
+						 int destinationSquareIndex) {
+		movePawn(bumpedPawnNum, destinationSquareIndex, -1);
+		movePawn(pawnNum, previousSquareIndex, destinationSquareIndex);
+	}
+	
+	public void switchPawns(int pawnNum,
+							int switchedPawnNum, 
+							int previousSquareIndex, 
+							int destinationSquareIndex) {
+		movePawn(switchedPawnNum, destinationSquareIndex, -2);
+		movePawn(pawnNum, previousSquareIndex, destinationSquareIndex);
+	}
 	/**
 	 * This class implements the ActionListener interface and defines the action
 	 * will be performed in response to the events occurred on the yellow pawns
@@ -1751,9 +1108,10 @@ public class SorryGame extends JApplet {
 	 		squareBtnSelected = false;
 	 		selectedSquareIndex = -2;
 	 		successfulMove = false;
-				
+			
+	 		
 			repaint();
-			revalidate();
+			//revalidate();
 		}// end of actionPerformed() handler
 
 	}// end of PawnButtonListener class
@@ -1799,7 +1157,7 @@ public class SorryGame extends JApplet {
 		}
 		
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of selectPawn()
 
 	/**
@@ -1819,6 +1177,7 @@ public class SorryGame extends JApplet {
 		 *            the event occurred on the square buttons
 		 */
 		public void actionPerformed(ActionEvent e) {
+			
 			if ( Arrays.asList(outerTrackButtons).contains(e.getSource()) || 
 					Arrays.asList(yellowSafetyZoneButtons).contains(e.getSource()) ||
 					e.getSource() == yellowHomeButton) {
@@ -1839,7 +1198,7 @@ public class SorryGame extends JApplet {
 	}// end of SquareButtonListener class
 	
 	public void selectSquare(int squareIndex) {
-		if (squareIndex > 0) {
+		if (squareIndex >= 0) {
 			squareBtnSelected = true;
 		}
 		else {
@@ -1855,12 +1214,20 @@ public class SorryGame extends JApplet {
 	 * This method is called by the ActionListener of the startNewGameBtn,
 	 * defines the action will be performed after the events occurred on the
 	 * startNewGameBtn.
+	 * It also distinguishes whether the game is started for the first time or not, and respond differently
 	 * 
 	 * @param evt
 	 *            event occurred on the startNewGameBtn
 	 */
 	private void startNewGameBtnActionPerformed(ActionEvent evt) {
 		if (evt.getSource() == startNewGameBtn) {
+			if (evt.getActionCommand().equals("start_0")) {
+				startNewGameBtn.setActionCommand("start_1");
+			}
+			if (evt.getActionCommand().equals("start_1")) {
+				endGame();
+				restartGame();
+			}
 			started = false;
 			niceComputerBtn.setEnabled(true);
 			meanComputerBtn.setEnabled(true);
@@ -1885,7 +1252,7 @@ public class SorryGame extends JApplet {
 			if (option == JOptionPane.YES_OPTION) {
 
 			} else if (option == JOptionPane.NO_OPTION) {
-				resetComponents();
+				endGame();
 			}
 		}
 	}// end of quitBtnActionPerformed() handler
@@ -1942,6 +1309,7 @@ public class SorryGame extends JApplet {
 	 */
 	private void drawCardBtnActionPerformed(ActionEvent evt) {
 		if (evt.getSource() == drawCardBtn) {
+			
 			cardDrawn = true;
 			displayCard(currentCardImage);
 			drawCardBtn.setEnabled(false);
@@ -2005,7 +1373,7 @@ public class SorryGame extends JApplet {
 		displayCardLabel.setVisible(true);
 		displayCardLabel.setIcon(new ImageIcon("C:/Users/xsong/Sorry/" + cardImage));
 		repaint();
-		revalidate();
+		//revalidate();
 	}// end of displayCard()
 	
 	public void clearCardDisplay() {
@@ -2021,35 +1389,47 @@ public class SorryGame extends JApplet {
 	public void setYellowPawnEnabled(boolean b) {
 		if (b) {
 			for (int i = 0; i < 4; i++) {
-				if (!board.pawns[i].isOnHome()) {
-					if (currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
+				yellowPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+				if (!board.pawns[i+4].isOnHome()) {
+					if (currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
 						if(board.pawns[i+4].getTrackIndex() == -1)
 							yellowPawn[i].setEnabled(false);
 						else
 							yellowPawn[i].setEnabled(true);
 					}
 					else {
-						boolean entranceBlocked = false;
-						for(int j = 0; j < 4 && !entranceBlocked; j++) {
-							if(board.pawns[j+4].getTrackIndex()==32) {
-								entranceBlocked = true;
-								if(SorryGame.debug) {
-									System.out.println("entranceBlocked = " + entranceBlocked);
+						if (currentCard.getcardNum() == 0) {
+							if (board.pawns[i+4].getTrackIndex() == -1)
+								yellowPawn[i].setEnabled(true);
+							else
+								yellowPawn[i].setEnabled(false);
+						}
+						else {
+							boolean entranceBlocked = false;
+							for(int j = 0; j < 4 && !entranceBlocked; j++) {
+								if(board.pawns[j+4].getTrackIndex()==32) {
+									entranceBlocked = true;
+									if(SorryGame.debug) {
+										System.out.println("entranceBlocked = " + entranceBlocked);
+									}
 								}
 							}
+							
+							if( entranceBlocked && board.pawns[i+4].getTrackIndex() == -1)
+								yellowPawn[i].setEnabled(false);
+							else
+								yellowPawn[i].setEnabled(true);
 						}
-						
-						if( entranceBlocked && board.pawns[i+4].getTrackIndex() == -1)
-							yellowPawn[i].setEnabled(false);
-						else
-							yellowPawn[i].setEnabled(true);
-					}
 
-					yellowPawn[i].setToolTipText("Click the pawn to select.");
+						yellowPawn[i].setToolTipText("Click the pawn to select.");
+					}
+					
 				}
 			}
-		} else {
+		}
+		else {
 			for (int i = 0; i < 4; i++) {
+				yellowPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
 				yellowPawn[i].setEnabled(false);
 				yellowPawn[i].setToolTipText(null);
 			}
@@ -2074,12 +1454,19 @@ public class SorryGame extends JApplet {
 		}
 		yellowHomePane.remove(yellowHomeButton);
 		repaint();
-		revalidate();
+		//revalidate();
 	}
 	
-	public int showCongratulationDialog() {
-		return JOptionPane.showConfirmDialog(null, 
-				"Congratulations! You WIN!/n/n/nClick OK to continue", "You win!", JOptionPane.OK_OPTION);
+	public void showCongratulationDialog(int player) {
+		if (player == COMPUTER )
+			JOptionPane.showMessageDialog(null, 
+					"Computer wins/n/n/nClick OK to continue", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+		else if (player == USER)
+			JOptionPane.showMessageDialog(null, 
+					"Congratulations! You WIN!/n/n/nClick OK to continue", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+		else
+			JOptionPane.showMessageDialog(null,
+					"Game ended unexpectedly./n/n/nClick OK to continue", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
@@ -2116,107 +1503,153 @@ public class SorryGame extends JApplet {
 		int numMoves = 0;
 		int previousSquareIndex;
 		
-		if(currentPlayer == COMPUTER) {
-			squareBtnSelected = false;
-			pawnSelected = false;
-			selectedSquareIndex = -2;
-			currentPawnIndex = -1;
-	 		cardDrawn = false;	 		
-			successfulMove = false;
-			
-			drawCardBtn.setEnabled(false);
-			setYellowPawnEnabled(false);
+		//initialize variables control the flow
+		squareBtnSelected = false;
+		pawnSelected = false;
+		selectedSquareIndex = -2;
+		currentPawnIndex = -1;
+ 		cardDrawn = false;	 		
+		successfulMove = false;
+		isWinner = -1;
+		
+		//set drawCardBtn and yellow pawns disabled so that the user cann't do anything during computer's turn
+		drawCardBtn.setEnabled(false);
+		setYellowPawnEnabled(false);
 
-			currentCard = board.drawCard();
-			displayCard(currentCard.getPictureName());
+		//display computer's card
+		currentCard = board.drawCard();
+		displayCard(currentCard.getPictureName());
 
-			//check whether all red pawns are on start
-			boolean isAllPawnOnStart = true;
-			for (int i = 0; i < 4; i++ ) {
-				if(board.pawns[i].getTrackIndex() != -1)
-					isAllPawnOnStart = false;
-			}
-			
-			if (isAllPawnOnStart && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
-				try {
-					Thread.sleep(delayLength);
-				}
-				catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				clearCardDisplay();
-				return true;
-			}
-			
-			currentPawnIndex = board.pawns[0].id;
-			previousSquareIndex = board.pawns[currentPawnIndex].getTrackIndex();
-
-			int location = computer.findMove(board, currentCard);
-			numMoves = board.movePawnTo(board.pawns[currentPawnIndex], location);
-			
-			
-			//currentPawn = computer.selectPawn(board, currentCard);
-			//movePawn(currentPawn.getID(), computer.findMove(board, currentCard));
-			
+		//check whether all red pawns are on start
+		boolean isAllPawnOnStart = true;
+		for (int i = 0; i < 4; i++ ) {
+			if(board.pawns[i].getTrackIndex() != -1)
+				isAllPawnOnStart = false;
+		}
+		
+		//if all red paws are on start, if not card sorry, 1 or 2, computer's turn terminates without movements
+		if (isAllPawnOnStart && currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
 			try {
 				Thread.sleep(delayLength);
 			}
 			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			selectPawn(currentPawnIndex);
-			if(SorryGame.debug) {
-				System.out.println("red pawn " + currentPawnIndex+" is moving to " + location);
-			}
-			if (numMoves > 0) {
-				try {
-					Thread.sleep(delayLength);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				movePawn(currentPawnIndex, previousSquareIndex, board.pawns[currentPawnIndex].getTrackIndex());
-			}
-			
-			try {
-				Thread.sleep(delayLength);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
 			clearCardDisplay();
-		} 
+			return true;
+		}
 		
-		return successfulMove;
+		try {
+			Thread.sleep(delayLength);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		//choose a red pawn based on the computer strategy
+		currentPawnIndex = board.pawns[0].id;
+		//change the selected pawn to grey
+		selectPawn(currentPawnIndex);
+		
+		try {
+			Thread.sleep(delayLength);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		//remember where the red pawn was
+		previousSquareIndex = board.pawns[currentPawnIndex].getTrackIndex();
+
+		//find destination for the red pawn
+		int location = computer.findMove(board, currentCard);
+		
+		//in case a yellow pawn is bumped, remember its previous position before moving it back to start
+		int[] previousYellowPawnSquareIndex = new int[4];
+		for (int i = 0; i < 4; i++) {
+			previousYellowPawnSquareIndex[i] = board.pawns[i+4].getTrackIndex();
+		}
+		//move the red pawn in gameBoard, might bump or switch place with a yellow pawn
+		numMoves = board.movePawnTo(board.pawns[currentPawnIndex], location);
+		
+		//if a yellow pawn is bumped, move it back to start first
+		for (int i = 0; i < 4; i++) {
+			if (board.pawns[i+4].getTrackIndex() != previousYellowPawnSquareIndex[i]) {
+				//if the yellow pawn is bumped back to start(= not switched places), move it to start first
+				if(currentCard.getcardNum() == 11)
+				//if the pawn is switched place, remove the red pawn from previous location first
+					movePawn(currentPawnIndex, previousSquareIndex, -2);
+				
+				movePawn(board.pawns[i+4].id, previousYellowPawnSquareIndex[i], board.pawns[i+4].getTrackIndex());
+				
+			}
+		}
+		
+		//move the red pawn to destination without showing the sliding
+		movePawn(currentPawnIndex, -2, board.pawns[currentPawnIndex].getTrackIndex());
+
+		//currentPawn = computer.selectPawn(board, currentCard);
+		//movePawn(currentPawn.getID(), computer.findMove(board, currentCard));
+		
+		if(SorryGame.debug) {
+			System.out.println("red pawn " + currentPawnIndex+" is moving to " + location);
+		}
+		
+		
+		try {
+			Thread.sleep(delayLength);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		clearCardDisplay();
+		
+		if(board.hasWon(COMPUTER)) {
+			showCongratulationDialog(COMPUTER);
+			isWinner = COMPUTER;
+			return false;
+		}
+		
+		return true;
 	}
 	
 	
 	public boolean userPlay() {
 		int numMoves = 0;
-		int previousSquareIndex;
+		int previousSquareIndex;//remember where the pawn was
 		
+		//initialize all flow-control variables
 		squareBtnSelected = false;
 		pawnSelected = false;
 		selectedSquareIndex = -2;
 		currentPawnIndex = -1;
  		cardDrawn = false;
 		successfulMove = false;
+		isWinner = -1;
 		
+		//draw a card, set image ready for display
 		currentCard = board.drawCard();
+		if(SorryGame.debug) {
+			System.out.println("User drew card: " + currentCard.getcardNum());
+		}
 		setCurrentCardImage(currentCard.getPictureName());
 		drawCardBtn.setEnabled(true);
 		
+		//wait for user to draw the card
 		do{}
-		while (!cardDrawn);
+		while(!cardDrawn);
 		
 		//check whether all pawns are on start
 		boolean isAllPawnOnStart = true;
 		for (int i = 4; i < 8; i++ ) {
+			if(SorryGame.debug) {
+				System.out.println("board.pawns[" + i +"].getTrackIndex() = "+board.pawns[i].getTrackIndex());
+			}
 			if(board.pawns[i].getTrackIndex() != -1)
 				isAllPawnOnStart = false;
 		}
-		
-		if (isAllPawnOnStart && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
+		//if all pawns are on start and the card is not sorry, 1 or 2, user's turn terminates
+		if (isAllPawnOnStart && currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
 			
 			try {
 				Thread.sleep(delayLength);
@@ -2227,38 +1660,60 @@ public class SorryGame extends JApplet {
 			clearCardDisplay();
 			return true;
 		}
-
-		setYellowPawnEnabled(true);
 		
+		//sets all pawns which are not on start enabled.
+		setYellowPawnEnabled(true);
+
+		//wait for user to select a pawn
 		do{}
-		while (!pawnSelected);
+		while(!pawnSelected);
 		
 		if(SorryGame.debug) {
 			System.out.println("currently selected pawn is" + currentPawnIndex);
 		}
 		
+		//remember where the pawn was on in order to move it out of the old position
 		previousSquareIndex = board.pawns[currentPawnIndex].getTrackIndex();
+		//find moves for lighting up the squares
 		int[] movesFound = board.findMoves(board.pawns[currentPawnIndex], currentCard);
 		if(SorryGame.debug) {
 			for (int i = 0; i < movesFound.length; i++)
 				System.out.print("found moves: " + movesFound[i] + ", ");
 			System.out.println();
 		}
+		
+		//light up the squares found, if no moves were found, user's turn terminates
 		if (movesFound.length > 0)
 			squareLightUp(movesFound);
 		else
 			return true;
 		
+		//wait for user to select a square
 		do{}
-		while (!squareBtnSelected);
+		while(!squareBtnSelected);
 		
+		//in case a red pawn is bumped, remember its previous position before moving it back to start
+		int[] previousRedPawnSquareIndex = new int[4];
+		for (int i = 0; i < 4; i++) {
+			previousRedPawnSquareIndex[i] = board.pawns[i].getTrackIndex();
+		}
+		
+		//move selected pawn to destination in both the gameBoard and the GUI
 		numMoves = board.movePawnTo(board.pawns[currentPawnIndex], selectedSquareIndex);
+		
+		//if a red pawn is bumped or switched place with user's pawn, move it to the new location
+		for (int i = 0; i < 4; i++) {
+			if (board.pawns[i].getTrackIndex() != previousRedPawnSquareIndex[i])
+				movePawn(board.pawns[i].id, previousRedPawnSquareIndex[i], board.pawns[i].getTrackIndex());
+		}
+		
 		movePawn(currentPawnIndex, previousSquareIndex, selectedSquareIndex);
 		
 		if (SorryGame.debug){
 			System.out.println("numMoves = " + numMoves);
 		}
 			
+		//if the yellow pawn slided to the end of the slide, show the new location in GUI
 		if( successfulMove && board.pawns[currentPawnIndex].getTrackIndex() != selectedSquareIndex) {
 			successfulMove = false;			
 			int newLocation = board.pawns[currentPawnIndex].getTrackIndex();
@@ -2271,14 +1726,23 @@ public class SorryGame extends JApplet {
 			
 			if (SorryGame.debug){
 				System.out.println("pawn slided to the new location");
-			}
-			
+			}			
+		}
+		
+		//check if the user wins
+		if(board.hasWon(USER)) {
+		//if(true){
+			isWinner = USER;
+			showCongratulationDialog(USER);
+			return false;
 		}
 			
+		//if card 7 and hasn't won, make a second move based on what's left
 		if (successfulMove && currentCard.getcardNum() == 7 && numMoves < 7) {
 			
 			clearTrack();
-
+			
+			//create a new rule of making forward, based on the moves left after moving the first pawn
 			SRRule secondMoveRule = new SRRule(7-numMoves);
 			pawnSelected = false;
 			squareBtnSelected = false;
@@ -2311,6 +1775,7 @@ public class SorryGame extends JApplet {
 				System.out.println("numMoves = " + numMoves);
 			}
 			
+			//handles the sliding
 			if( successfulMove && board.pawns[currentPawnIndex].getTrackIndex() != selectedSquareIndex) {
 				successfulMove = false;
 				int newLocation = board.pawns[currentPawnIndex].getTrackIndex();
@@ -2337,11 +1802,200 @@ public class SorryGame extends JApplet {
 		}
 		
 		clearCardDisplay();
+		
+		//check again if the user wins after making the second move if card 7
+		if(board.hasWon(USER)) {
+		//if(true){
+			isWinner = USER;
+			showCongratulationDialog(USER);
+			return false;
+		}
 
 		return true;
 		//System.out.println("pawn is now on square "+board.pawns[currentPawnIndex].getTrackIndex());
-	}
+	
+	}//end of userPlay()
 
+	/**
+	 * This method removes all the GUI components, get ready for starting a new game
+	 */
+	public void endGame() {
+		//remove all buttons from square panes
+		for(int i = 0; i < 225; i++) {
+			transparentSquarePane[i].removeAll();
+		}
+		//remove buttons from start squares;
+		for (int i = 0; i<4; i++) {
+			redStartSquarePane[i].removeAll();
+			yellowStartSquarePane[i].removeAll();
+		}
+		//remove buttons from safety zones
+		for (int i = 0; i<5; i++) {
+			redSafetyZoneSquarePane[i].removeAll();
+			yellowSafetyZoneSquarePane[i].removeAll();
+		}
+		//remove buttons from home
+		redHomePane.removeAll();
+		yellowHomePane.removeAll();
+		//disable card display
+		clearCardDisplay();
+		drawCardBtn.setOpaque(false);
+		drawCardBtn.setVisible(false);
+		
+		repaint();
+	}//end of endGame()
+	
+	/**
+	 * This method resets all GUI components back to the beginning without creating new objects
+	 */
+	public void resetComponents() {
+		//set outerTrackButtons back to square pane
+		for (int i = 0; i < 15; i++) {
+			transparentSquarePane[i].add(outerTrackButtons[i]);
+			outerTrackPaneIndex[i] = i;
+		}
+		for (int i = 15, j = 29; i < 29 && j < 225; i++, j += 15) {
+			transparentSquarePane[j].add(outerTrackButtons[i]);
+			outerTrackPaneIndex[i] = j;
+		}
+		for (int i = 29, j = 223; i < 43 && j > 209; i++, j--) {
+			transparentSquarePane[j].add(outerTrackButtons[i]);
+			outerTrackPaneIndex[i] = j;
+		}
+		for (int i = 43, j = 195; i < 56 && j > 14; i++, j -= 15) {
+			transparentSquarePane[j].add(outerTrackButtons[i]);
+			outerTrackPaneIndex[i] = j;
+		}
+		//end of resetting outerTrackButtons
+		/***************************************************************************************/
+	
+		// set up the image for red pawns
+		for (int i = 0; i < 4; i++) {
+			redPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg"));
+		}
+		/***************************************************************************************/
+	
+		//set all red pawns on start
+		for (int i = 0; i < 4; i++) {
+			redStartSquarePane[i].add(redPawn[i]);
+		}
+		/***************************************************************************************/
+	
+		// set up the image for yellow pawns
+		for (int i = 0; i < 4; i++) {
+			yellowPawn[i].setIcon(new javax.swing.ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg")); // NOI18N
+		}
+		/***************************************************************************************/
+	
+		//set up all yellow pawns on start
+		for (int i = 0; i < 4; i++) {
+			yellowStartSquarePane[i].add(yellowPawn[i]);
+		}
+		/***************************************************************************************/
+	
+		//set yellowSafetyZoneButtons back to the square pane
+		for (int i = 0; i < 5; i++) {
+			yellowSafetyZoneSquarePane[i].add(yellowSafetyZoneButtons[i]);
+		}
+		/***************************************************************************************/
+	
+		//enable the drawCardBtn
+		drawCardBtn.setEnabled(true);
+		drawCardBtn.setVisible(true);
+				
+		repaint();
+		
+	}//end of resetComponents()
+	
+	/**
+	 * This method restart a new game, without creating new GUI frame, but reset all component back to the beginning
+	 * The rest is the same as playGame() method
+	 */
+	public void restartGame() {
+		//reset the GUI components without creating new objects, just physically put everything back
+		resetComponents();
+		if(SorryGame.debug) {
+			System.out.println("GUI components have been reset");
+		}
+		
+		//start a new game board
+		board = new SRGameBoard();
+		//computerType = NICE_COMPUTER;
+		started = false;
+ 		pawnSelected = false;
+  		currentPawnIndex = -1;
+ 		squareBtnSelected = false;
+ 		cardDrawn = false;
+ 		successfulMove = false;
+ 		selectedSquareIndex = -2;
+        
+ 		boolean continued = false;
+ 		isWinner = -1;
+ 		/***************************************************************************************/
+        
+ 		//the default first player is the user
+  		currentPlayer = USER;
+  		int numMoves = 0;
+  		
+  		computer = new SRComputer();
+  		
+  		//wait for the user to choose the computer type, sets true if niceComputerBtn or meanComputerBtn pressed
+  		do{}
+  		while(!started);
+  		
+  		/*//initialize the computer type based on the user input
+  		if (gameGUI.getComputerType() == NICE_COMPUTER) {
+  			currentComp = new SRNiceComputer();
+  		}
+  		else if (gameGUI.getComputerType() == MEAN_COMPUTER) {
+  			currentComp = new SRMeanComputer();
+  		}*/
+  		
+  		//if not won, take turns to play the game
+  		do {
+  			
+  			if (currentPlayer == COMPUTER) {
+  				
+  				//no matter whether computer makes moves, if has not won, continued is always true
+  				continued = computerPlay();
+  				
+  				//if card 2, second turn
+  				if (continued && currentCard.getcardNum() == 2)
+  					continued = computerPlay();
+  				
+  				//switch player
+  				currentPlayer = USER;
+  			}
+  			else if (currentPlayer == USER) {
+  				//no matter whether user makes moves, if has not won, continued is always true
+  				continued = userPlay();
+  				
+  				//if card 2, second turn
+  				if (continued && currentCard.getcardNum() == 2)
+  					continued = userPlay();
+  				
+  				//switch player
+  				currentPlayer = COMPUTER;
+  			}
+  			
+  			try {
+  				Thread.sleep(delayLength);
+  			} catch (InterruptedException e) {
+  				e.printStackTrace();
+  			}
+
+  		} while(continued && isWinner < 0);
+  		  			
+  		//remove all GUI components when game over
+  		endGame();
+  		
+	}//end of restartGame()
+
+	/**
+	 * This method sets current player
+	 * 
+	 * @param playerID
+	 */
 	public void setCurrentPlayer(int playerID) {
 		currentPlayer = playerID;
 	}
