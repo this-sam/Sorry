@@ -18,6 +18,10 @@ public class SRSquare {
 		this(0, 1, false);
 	}
 	
+	public SRSquare(int maxPawns){
+		this(0,maxPawns, false);
+	}
+	
 	public SRSquare(int slideLength, int maxPawns, boolean isHome) {
 		this(slideLength, maxPawns, isHome, false);
 	}

@@ -73,7 +73,7 @@ public class SRGameBoard {
 		
 		//create startSquares
 		for (int i=0;i<this.startSquares.length; i++){
-			this.startSquares[i] = new SRStartSquare();
+			this.startSquares[i] = new SRSquare(4);
 		}
 		
 		//shuffle the deck
