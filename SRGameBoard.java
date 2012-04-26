@@ -19,8 +19,8 @@ import java.util.Random;
  */
 public class SRGameBoard {
 	//debug
-	private static boolean debug = true;
-	private static boolean pawnsStartHome = true;
+	private static boolean debug = false;
+	private static boolean pawnsStartHome = false;
 	
 	//constants
 	public static final int trackLength = 56;
@@ -747,7 +747,7 @@ public class SRGameBoard {
 		int pawnIndex;
 		
 		//while (!gb.deck.isEmpty() && !gb.hasWon(0) && !gb.hasWon(1)){
-		for(int p=0;p<1;p++){
+		for(int p=0;p<2;p++){
 			do{
 				pawnIndex = rand.nextInt(8);
 				pawnIndex = 4;
