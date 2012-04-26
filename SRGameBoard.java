@@ -19,8 +19,9 @@ import java.util.Random;
  */
 public class SRGameBoard {
 	//debug
-	private static boolean debug = false;
+	private static boolean debug = true;
 	private static boolean pawnsStartHome = false;
+	private static boolean pawnsStartSafety = false;
 	
 	//constants
 	public static final int trackLength = 56;
@@ -101,9 +102,13 @@ public class SRGameBoard {
 		
 		if (SRGameBoard.pawnsStartHome){
 			for (int i=0; i<this.pawns.length;i++){
-				//if (i!=0 && i!=5){
+				movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-1);
+			}
+		}
+		
+		if (SRGameBoard.pawnsStartSafety){
+			for (int i=0; i<this.pawns.length;i++){
 				movePawnTo(this.pawns[i], SRGameBoard.safetyZoneIndex[this.pawns[i].getPlayer()]+SRGameBoard.safetyLength-3);
-				//}
 			}
 		}
 //		
@@ -750,10 +755,9 @@ public class SRGameBoard {
 		for(int p=0;p<2;p++){
 			do{
 				pawnIndex = rand.nextInt(8);
-				pawnIndex = 4;
+				//pawnIndex = 4;
 				pawn = gb.pawns[pawnIndex];
 			}while(pawn.isOnHome());
-			
 			
 			
 			System.out.println("Moving pawn "+pawnIndex+" from "+pawn.getTrackIndex());
