@@ -32,7 +32,7 @@ public class SRGameBoard {
 	public static final int[] safetyZoneIndex = {56,62};
 	public static final int[] safetyZoneEntrance = {2, 29};
 	public static final int[] startIndex = {4,32};
-	public static final int slideLength = 4;
+	public static final int slideLength = 3;
 	public static final int[] slideIndex = {1,9, 15, 23, 29, 37, 43, 51}; 
 	
 	//gameplay	
