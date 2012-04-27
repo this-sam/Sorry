@@ -218,7 +218,7 @@ public class SRGameBoard {
 				boolean canEnterSafety = false;
 				if (currIndex == SRGameBoard.safetyZoneEntrance[pawn.player]){
 					canEnterSafety = true;
-					numMovesLeft = numMoves;
+					numMovesLeft = numMoves-1;
 				}
 				else{
 					for (int i=0; i<regIndices.length; i++){
@@ -233,11 +233,11 @@ public class SRGameBoard {
 					printDebug("P"+pawn.getPlayer()+" pawn "+pawn.getID()+" can enter safety!");
 					
 					int firstSafetyIndex = SRGameBoard.safetyZoneIndex[pawn.player];
-					safetyIndices = this.getSafetyMoves(pawn.player, firstSafetyIndex, numMovesLeft);
+					safetyIndices = this.getSafetyMoves(pawn.player, firstSafetyIndex-1, numMovesLeft+1);
 					safetyIndicesCount = safetyIndices.length;
 					//determine whether the safety moves were valid
 					//set the count of safetyIndices appropriately
-					if ((numMovesLeft != safetyIndices.length) && (!canSplit)){
+					if ((numMovesLeft != safetyIndices.length-1) && (!canSplit)){
 						safetyIndicesCount = 0;
 					}
 				}//end if(canEnterSafety)
@@ -677,6 +677,9 @@ public class SRGameBoard {
 		if(returnValue > SRGameBoard.trackLength/2){
 			returnValue = SRGameBoard.trackLength -index1+index2;
 		}
+		if (index2>42&&index1>55){
+			return index1-index2+3;
+		}
 
 		return returnValue;
 	}
@@ -838,7 +841,7 @@ public class SRGameBoard {
 //		}
 //	
 		if (SRGameBoard.debug){
-			gb.movePawnTo(gb.pawns[0], 56);
+			gb.movePawnTo(gb.pawns[0], 55);
 		}
 //		
 //		gb.hasWon(0);
