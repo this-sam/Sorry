@@ -34,9 +34,9 @@ public class SRRule {
 			this.canSplit = true;
 			this.numMoves = 7;
 		}
-		else if (this.numMoves == 10){
+		else if (numMoves == 10){
 			this.shiftBackwards = true;
-			this.numMoves = 11;
+			this.numMoves = 10;
 		}
 		else{
 			this.numMoves = numMoves;

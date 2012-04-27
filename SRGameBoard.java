@@ -29,7 +29,7 @@ public class SRGameBoard {
 	public static final int trackLength = 56;
 	public static final int safetyLength = 6;
 	public static final int[] safetyZoneIndex = {56,62};
-	public static final int[] safetyZoneEntrance = {2, 29};
+	public static final int[] safetyZoneEntrance = {2, 30};
 	public static final int[] startIndex = {4,32};
 	public static final int slideLength = 3;
 	public static final int[] slideIndex = {1,9, 15, 23, 29, 37, 43, 51}; 
@@ -206,6 +206,8 @@ public class SRGameBoard {
 		int [] safetyIndices = new int [numMoves*step];
 		int safetyIndicesCount = 0;
 		
+		printDebug("pawn index before movement is "+currIndex);		
+		
 		//IF the pawn is on the regular track:
 		if (currIndex < SRGameBoard.trackLength){
 			regIndices = this.getNormalMoves(pawn.player, pawn.trackIndex, numMoves);
@@ -214,21 +216,28 @@ public class SRGameBoard {
 			if (step>0){
 				int numMovesLeft = 0; //number of moves left to make inside safety zone
 				boolean canEnterSafety = false;
-				for (int i=0; i<regIndices.length; i++){
-					if (regIndices[i] == SRGameBoard.safetyZoneEntrance[pawn.player]){
-						canEnterSafety = true;
-						numMovesLeft = numMoves-(i+1);
+				if (currIndex == SRGameBoard.safetyZoneEntrance[pawn.player]){
+					canEnterSafety = true;
+					numMovesLeft = numMoves-1;
+				}
+				else{
+					for (int i=0; i<regIndices.length; i++){
+						if (regIndices[i] == SRGameBoard.safetyZoneEntrance[pawn.player]){
+							numMovesLeft = numMoves-(i+2);
+							printDebug("NumMovesLeft = "+numMovesLeft);	
+							canEnterSafety = true;
+						}
 					}
 				}
 				if (canEnterSafety){
 					printDebug("P"+pawn.getPlayer()+" pawn "+pawn.getID()+" can enter safety!");
 					
 					int firstSafetyIndex = SRGameBoard.safetyZoneIndex[pawn.player];
-					safetyIndices = this.getSafetyMoves(pawn.player, firstSafetyIndex, numMovesLeft);
+					safetyIndices = this.getSafetyMoves(pawn.player, firstSafetyIndex-1, numMovesLeft+1);
 					safetyIndicesCount = safetyIndices.length;
 					//determine whether the safety moves were valid
 					//set the count of safetyIndices appropriately
-					if ((numMovesLeft != safetyIndices.length) && (!canSplit)){
+					if ((numMovesLeft != safetyIndices.length-1) && (!canSplit)){
 						safetyIndicesCount = 0;
 					}
 				}//end if(canEnterSafety)
@@ -251,9 +260,13 @@ public class SRGameBoard {
 				safetyIndicesCount = 0;
 			}
 			else if (step < 0){
-				int numMovesLeft = (numMoves*step - safetyIndices.length)*step;
-				regIndices = getNormalMoves(pawn.player, SRGameBoard.safetyZoneEntrance[pawn.player], numMovesLeft);
+				
+				safetyIndicesCount = 0;
+				int numMovesLeft = (numMoves*step - (safetyIndices.length))*step;
+				printDebug("numMovesLeft = "+numMovesLeft);
+				regIndices = getNormalMoves(pawn.player, SRGameBoard.safetyZoneEntrance[pawn.player]+1, numMovesLeft);
 				regIndicesCount = regIndices.length;
+				printDebug("regIndices.length = "+regIndices.length);
 			}
 		}
 		
@@ -267,10 +280,10 @@ public class SRGameBoard {
 		
 		int [] finalArray = cleanUpMoveArrays(regIndices, safetyIndices, canSplit);
 		
-		//handle 10
-		if (rule.shiftBackwards){
-			finalArray = concatArrays(findMoves(pawn, new SRCard(-1)), finalArray);
-		}
+//		if (rule.shiftBackwards){
+//			printDebug("Handling rule 10");
+//			finalArray = concatArrays(findMoves(pawn, new SRCard(-1)), finalArray);
+//		}
 		
 		//check arrays to be sure they do not contain any of the player's pawns
 		int playerIndex = 4*pawn.getPlayer();
@@ -406,8 +419,8 @@ public class SRGameBoard {
 		if (numMoves < 0){
 			printDebug("Switching direction for negative movement.");
 			int temp = min;
-			min = max;
-			max = temp;
+			min = max-1;
+			max = temp-1;
 		}
 		int step = getStep(numMoves);
 		
@@ -422,27 +435,30 @@ public class SRGameBoard {
 		printDebug("All potential indices are:");
 		for (int i=min;i < max; i++){
 			nextIndex = (currIndex+(i+1));
-			printDebug("NextIndex");
+			printDebug("NextIndex: "+nextIndex);
 			allIndices[indiceCount] = nextIndex;
 			indiceCount++;
-			//System.out.println("Next index: "+nextIndex);
 		}
 		
 		indiceCount = 0;
 		//now trim the list down to only squares in the safety zone
+		printDebug("Keeping the following indices.");
 		for (int i=0; i<allIndices.length; i++){
-			//System.out.println("Checking index: "+allIndices[i]);
 			if (allIndices[i] < safetyEnd && allIndices[i] >= safetyStart){
-				//System.out.println("Passed!");
+				printDebug("Keeping: "+allIndices[i]);
 				safetyIndices[indiceCount] = allIndices[i];
 				indiceCount++;
 			}
 		}
 		
 		int [] finalArray = this.trimArray(safetyIndices, indiceCount); 
-		
+
 		if (step==-1){
 			finalArray = this.reverseArray(finalArray);
+		}
+		
+		for (int i=0;i<finalArray.length;i++){
+			printDebug("final array to return contains: "+finalArray[i]);
 		}
 		
 		return finalArray;
@@ -645,7 +661,7 @@ public class SRGameBoard {
 			if (index1 > SRGameBoard.safetyZoneIndex[1]){
 				zone = 1;
 			}
-			distance =index1-SRGameBoard.safetyZoneIndex[zone];
+			distance = index1-SRGameBoard.safetyZoneIndex[zone];
 			normalDist = index2 - SRGameBoard.safetyZoneEntrance[zone];
 		}
 		
@@ -655,7 +671,17 @@ public class SRGameBoard {
 		if (normalDist < 0){
 			normalDist*=-1;
 		}
-		return distance+normalDist;
+		
+		int returnValue = distance+normalDist;
+		//if they're going around the corner:
+		if(returnValue > SRGameBoard.trackLength/2){
+			returnValue = SRGameBoard.trackLength -index1+index2;
+		}
+		if (index2>42&&index1>55){
+			return index1-index2+3;
+		}
+
+		return returnValue;
 	}
 	
 	
@@ -810,20 +836,25 @@ public class SRGameBoard {
 		SRPawn pawn;
 		int pawnIndex;
 		
-		for (int i=0;i<gb.pawns.length;i++){
-			gb.movePawnTo(gb.pawns[i], i+49);
-		}
-//		
-//		gb.movePawnTo(gb.pawns[5], 8);
+//		for (int i=0;i<gb.pawns.length;i++){
+//			gb.movePawnTo(gb.pawns[i], i+49);
+//		}
+//	
+//		if (SRGameBoard.debug){
+//			gb.movePawnTo(gb.pawns[4], 28);
+//		}
 //		
 //		gb.hasWon(0);
 //		gb.hasWon(1);
 		
 		//play the game randomly until the victory condition is met
 		while (!gb.deck.isEmpty() && !gb.hasWon(0) && !gb.hasWon(1)){
-		//for (int turn = 0; turn<4;turn++){	
+		//for (int turn = 0; turn<1;turn++){	
 			do{
 				pawnIndex = rand.nextInt(8);
+//				if (SRGameBoard.debug){
+//					pawnIndex = 4;
+//				}
 				pawn = gb.pawns[pawnIndex];
 			}while(pawn.isOnHome());
 
@@ -833,24 +864,22 @@ public class SRGameBoard {
 			gb.printDebug("Trying to use card "+card.cardNum);
 			moves = gb.findMoves(pawn, card);
 
+			gb.printDebug("\nBack to moving a pawn in main:");
 			for (int i =0; i<moves.length;i++){
 				gb.printDebug("Move ["+i+"] is "+moves[i]);
 			}
 
-			if(moves.length>1){
+			if(moves.length>0){
 				choice  = rand.nextInt(moves.length);
 				gb.movePawnTo(pawn, moves[choice]);
-			}
-			else if (moves.length == 1){
-				gb.movePawnTo(pawn, moves[0]);
 			}
 			else{
 				gb.printDebug("No moves.");
 			}
 			gb.printDebug("= = = = = = = = = = = = ");
 			for (int i=0; i<gb.pawns.length;i++){
-				gb.printDebug("Player "+gb.pawns[i].player+" pawn "+gb.pawns[i].id+" is at "+gb.pawns[i].trackIndex);
-				gb.printDebug(" || onHome = " + gb.pawns[i].onHome + ", trackIndex = " +gb.pawns[i].trackIndex+"\n");
+				gb.printDebug("Player "+gb.pawns[i].player+" pawn "+gb.pawns[i].id+" is at "+gb.pawns[i].trackIndex+
+						" || onHome = " + gb.pawns[i].onHome + ", trackIndex = " +gb.pawns[i].trackIndex);
 			}
 			gb.printDebug("\n\n========================");
 			
