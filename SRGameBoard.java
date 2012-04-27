@@ -17,12 +17,11 @@ import java.util.Random;
  * the track, deck, pawns, and records information about the game to be logged as
  * statistics.
  *
- * @author Sam Brown, Caleb Cousins, Taylor Krammen, and Yucan Zhang
+ * @author Sam Brown, Taylor Krammen, and Yucan Zhang
  */
 public class SRGameBoard {
 	//debug
 	private static boolean debug = false;
-	//private static boolean debugPause = true;
 	private static boolean pawnsStartHome = false;
 	private static boolean pawnsStartSafety = false;
 	
@@ -79,7 +78,6 @@ public class SRGameBoard {
 		//shuffle the deck
 		this.deck = new SRDeck();
 		this.deck.shuffle();
-		
 		
 		//make some pawns
 		for (int i=0; i<this.pawns.length;i++){
@@ -214,7 +212,6 @@ public class SRGameBoard {
 			regIndicesCount = regIndices.length;
 			//if movement wasn't negative, maybe there was an opportunity to enter the safety zone!
 			if (step>0){
-				//System.out.println("And that is greater than zero...");
 				int numMovesLeft = 0; //number of moves left to make inside safety zone
 				boolean canEnterSafety = false;
 				for (int i=0; i<regIndices.length; i++){
@@ -224,7 +221,8 @@ public class SRGameBoard {
 					}
 				}
 				if (canEnterSafety){
-					//System.out.println("Can enter safety!");
+					printDebug("P"+pawn.getPlayer()+" pawn "+pawn.getID()+" can enter safety!");
+					
 					int firstSafetyIndex = SRGameBoard.safetyZoneIndex[pawn.player];
 					safetyIndices = this.getSafetyMoves(pawn.player, firstSafetyIndex, numMovesLeft);
 					safetyIndicesCount = safetyIndices.length;
@@ -275,7 +273,8 @@ public class SRGameBoard {
 		}
 		
 		//check arrays to be sure they do not contain any of the player's pawns
-		for (int i=pawn.getPlayer(); i<(4*pawn.getPlayer()+4); i++){
+		int playerIndex = 4*pawn.getPlayer();
+		for (int i=playerIndex; i<(playerIndex+4); i++){
 			if (!pawns[i].isOnHome()){
 				finalArray = removeElementFrom(pawns[i].getTrackIndex(), finalArray);
 			}
@@ -401,11 +400,11 @@ public class SRGameBoard {
 		printDebug("\nEntered getSafetyMoves().");
 		int safetyStart = SRGameBoard.safetyZoneIndex[player];
 		int safetyEnd = safetyStart + SRGameBoard.safetyLength;
+		
 		int min = 0;
 		int max = 0 + numMoves;
 		if (numMoves < 0){
 			printDebug("Switching direction for negative movement.");
-
 			int temp = min;
 			min = max;
 			max = temp;
@@ -420,8 +419,10 @@ public class SRGameBoard {
 		printDebug("Min is set to: "+min+" Max is set to: "+max);
 		
 		//first get all theoretical places the pawn can go
+		printDebug("All potential indices are:");
 		for (int i=min;i < max; i++){
 			nextIndex = (currIndex+(i+1));
+			printDebug("NextIndex");
 			allIndices[indiceCount] = nextIndex;
 			indiceCount++;
 			//System.out.println("Next index: "+nextIndex);
@@ -438,7 +439,13 @@ public class SRGameBoard {
 			}
 		}
 		
-		return this.reverseArray(this.trimArray(safetyIndices, indiceCount)); 
+		int [] finalArray = this.trimArray(safetyIndices, indiceCount); 
+		
+		if (step==-1){
+			finalArray = this.reverseArray(finalArray);
+		}
+		
+		return finalArray;
 	}
 	
 	//returns an array of SRPawns which belong to a given player
@@ -757,17 +764,18 @@ public class SRGameBoard {
 	//removes element from array
 	private int[] removeElementFrom(int removeMe, int[] array) {
 		int arrayLen = array.length;
+		int [] newArray = array;
+		
 		for (int i=0;i<arrayLen;i++){
 			if (array[i]==removeMe){
-				System.arraycopy(array,i+1,array,i,array.length-1-i);
+				printDebug("Removing "+removeMe+"from array because there is a pawn there.");
+				newArray = new int [array.length-1];
+				System.arraycopy(array, 0, newArray, 0, i);
+				System.arraycopy(array, i+1, newArray, i, newArray.length-i);
 			}
 		}
 		
-		//debugging
-		for (int i=0; i<array.length;i++){
-			printDebug("Removing location "+array[i]+" from array because there is a pawn there.");
-		}
-		return array;
+		return newArray;
 	}
 	
 	//concatenates two arrays
@@ -801,10 +809,10 @@ public class SRGameBoard {
 		SRCard card;
 		SRPawn pawn;
 		int pawnIndex;
-		/*
+		
 		for (int i=0;i<gb.pawns.length;i++){
-			gb.movePawnTo(gb.pawns[i], i);
-		}*/
+			gb.movePawnTo(gb.pawns[i], i+49);
+		}
 //		
 //		gb.movePawnTo(gb.pawns[5], 8);
 //		
