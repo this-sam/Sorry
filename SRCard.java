@@ -5,13 +5,13 @@ import java.util.Arrays;
 * rules related to that particular card from the SRRule class, it will also display 
 * the text from each card to the user.
 * 
-* @author Sam Brown, Caleb Cousins, Taylor Krammen, and Yucan Zhang
+* @author Sam Brown, Taylor Krammen, and Yucan Zhang
 */
 
 public class SRCard {
 	//override cardNum for testing
 	public boolean override = false;
-	public int overrideDist = 10;
+	public int overrideDist = -4;
 	
 	//The following methods will set both the cardNum and the pictureName.
 	public int cardNum;
