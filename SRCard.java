@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class SRCard {
 	//override cardNum for testing
 	public boolean override = false;
-	public int overrideDist = -4;
+	public int overrideDist =-4;
 	
 	//The following methods will set both the cardNum and the pictureName.
 	public int cardNum;
