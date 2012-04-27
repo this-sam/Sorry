@@ -840,9 +840,9 @@ public class SRGameBoard {
 //			gb.movePawnTo(gb.pawns[i], i+49);
 //		}
 //	
-		if (SRGameBoard.debug){
-			gb.movePawnTo(gb.pawns[0], 55);
-		}
+//		if (SRGameBoard.debug){
+//			gb.movePawnTo(gb.pawns[4], 28);
+//		}
 //		
 //		gb.hasWon(0);
 //		gb.hasWon(1);
@@ -852,9 +852,9 @@ public class SRGameBoard {
 		//for (int turn = 0; turn<1;turn++){	
 			do{
 				pawnIndex = rand.nextInt(8);
-				if (SRGameBoard.debug){
-					pawnIndex = 0;
-				}
+//				if (SRGameBoard.debug){
+//					pawnIndex = 4;
+//				}
 				pawn = gb.pawns[pawnIndex];
 			}while(pawn.isOnHome());
 
