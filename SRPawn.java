@@ -14,6 +14,8 @@ public class SRPawn {
 	public int player;
 	public int id;
 	
+	public int homeIndex;
+	
 	//chain the constructors
 	public SRPawn(int player){
 		this(true, false, player);
@@ -84,14 +86,26 @@ public class SRPawn {
 	public void setOnHome(boolean onHome) {
 		this.onHome = onHome;
 	}
+	
+	public void setHomeIndex(int homeIndex){
+		this.homeIndex = homeIndex;
+	}
 
 	public void setTrackIndex(int index) {
 		this.trackIndex = index;
+		
 		if (this.trackIndex == -1){
 			this.setOnStart(true);
 		}
 		else if (this.isOnStart() == true){
 			this.setOnStart(false);
+		}
+		
+		if (this.trackIndex == this.homeIndex){
+			this.setOnHome(true);
+		}
+		else if (this.isOnHome() == true){
+			this.setOnHome(false);			
 		}
 	}
 

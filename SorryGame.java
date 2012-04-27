@@ -138,7 +138,7 @@ public class SorryGame extends JApplet {
   		do{}
   		while(!started);
   		
-  		computer = new SRComputer();
+  		computer = new SRComputer(1);
   				//new SRComputer(computerType, board);
 
   		/*//initialize the computer type based on the user input
