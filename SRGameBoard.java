@@ -215,7 +215,8 @@ public class SRGameBoard {
 				int numMovesLeft = 0; //number of moves left to make inside safety zone
 				boolean canEnterSafety = false;
 				for (int i=0; i<regIndices.length; i++){
-					if (regIndices[i] == SRGameBoard.safetyZoneEntrance[pawn.player]){
+					if (regIndices[i] == SRGameBoard.safetyZoneEntrance[pawn.player] || 
+						currIndex == SRGameBoard.safetyZoneEntrance[pawn.player]){
 						canEnterSafety = true;
 						numMovesLeft = numMoves-(i+1);
 					}
