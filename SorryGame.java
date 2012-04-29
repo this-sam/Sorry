@@ -21,12 +21,12 @@ import java.util.Arrays;
  * @author Sam Brown, Caleb Cousins, Taylor Krammen, and Yucan Zhang
  * 
  */
-public class SorryGame extends JApplet {
+public class SorryGame extends JFrame {
 	
 	//debug
-	private static boolean debug = true;
+	private static boolean debug = false;
 
-	private static final int delayLength = 100;
+	private static final int delayLength = 1000;
 	
 	// Variables declaration
 	//private JFrame frame;
@@ -49,7 +49,7 @@ public class SorryGame extends JApplet {
 	private JPanel yellowStartPane;
 	private JPanel yellowStartSquarePane[] = new JPanel[4];
 	private JPanel yellowHomePane;
-	private JButton yellowHomeButton;
+	private JButton yellowHomeButtons[] = new JButton[4];
 	private JPanel redSafetyZonePane, yellowSafetyZonePane;
 	private JPanel redSafetyZoneSquarePane[] = new JPanel[5];
 	private JPanel yellowSafetyZoneSquarePane[] = new JPanel[5];
@@ -65,6 +65,8 @@ public class SorryGame extends JApplet {
 	private String currentCardImage;
 	private Object[] options = {"Nice", "Mean"};  
 	private int computerType;
+	
+	private java.net.URL imgURL;
 	
 	public int selectedSquareIndex;
 	public boolean pawnSelected;
@@ -89,7 +91,7 @@ public class SorryGame extends JApplet {
 	// End of variables declaration
 
 
-	public void init() {
+	public static void main (String args[]) {
 		    //Execute a job on the event-dispatching thread:
 		    //creating this applet's GUI.
 		/*    
@@ -103,7 +105,8 @@ public class SorryGame extends JApplet {
 		        System.err.println("playGame didn't successfully complete");
 		    }
 		*/
-		playGame();
+		SorryGame sr = new SorryGame();
+		sr.playGame();
 	}
 	
 	/**
@@ -187,12 +190,13 @@ public class SorryGame extends JApplet {
 	 */
 	private void initComponents() {
 		// set up the frame
-		//frame = new JFrame();
-		//setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		new JFrame();
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setVisible(true);
 		setName("SORRY! Game - SB, CC, TK, YZ Group - CS205 Final Project");
 		setFont(new Font("Comic Sans MS", 0, 12));
 		setPreferredSize(new Dimension(781, 580));
+		setSize(new Dimension(781, 580));
 		/***************************************************************************************/
 
 		// create authour information.
@@ -327,7 +331,8 @@ public class SorryGame extends JApplet {
 		// set up the game board image as the background
 		gameBoardImageLabel = new JLabel();
 		gameBoardImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		//gameBoardImageLabel.setIcon(new ImageIcon("C:/Users/xsong/Sorry/SRgameBoardImage.jpg")); // NOI18N
+		java.net.URL gbImgURL = SorryGame.class.getResource("SRgameBoardImage.jpg");
+		gameBoardImageLabel.setIcon(new ImageIcon(gbImgURL)); 
 		gameBoardImageLabel.setPreferredSize(new Dimension(525, 525));
 		gameBoardImageLabel.setBounds(0, 0, 525, 525);
 		gameBoardLayeredPane.add(gameBoardImageLabel,
@@ -442,9 +447,10 @@ public class SorryGame extends JApplet {
 		// set up the red pawns
 		for (int i = 0; i < 4; i++) {
 			redPawn[i] = new JButton();
-			redPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg")); // NOI18N
+			imgURL = SorryGame.class.getResource("redPawn.jpg");
+			redPawn[i].setIcon(new ImageIcon(imgURL)); 
 			redPawn[i].setActionCommand("" + i);
-			redPawn[i].setDisabledIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg"));
+			redPawn[i].setDisabledIcon(new ImageIcon(imgURL));
 			redPawn[i].setMaximumSize(new Dimension(35, 35));
 			redPawn[i].setMinimumSize(new Dimension(35, 35));
 			redPawn[i].setPreferredSize(new Dimension(35, 35));
@@ -491,7 +497,7 @@ public class SorryGame extends JApplet {
 			redSafetyZoneSquarePane[i] = new JPanel();
 			redSafetyZoneSquarePane[i].setMaximumSize(new Dimension(35, 35));
 			redSafetyZoneSquarePane[i].setMinimumSize(new Dimension(35, 35));
-			redSafetyZoneSquarePane[i].setOpaque(true);
+			redSafetyZoneSquarePane[i].setOpaque(false);
 			redSafetyZoneSquarePane[i].setPreferredSize(new Dimension(35, 35));
 
 			redSafetyZoneSquarePane[i].setLayout(new GridLayout());
@@ -505,9 +511,10 @@ public class SorryGame extends JApplet {
 		// set up the yellow pawns
 		for (int i = 0; i < 4; i++) {
 			yellowPawn[i] = new JButton();
-			yellowPawn[i].setIcon(new javax.swing.ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg")); // NOI18N
+			imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+			yellowPawn[i].setIcon(new ImageIcon(imgURL)); 
 			yellowPawn[i].setActionCommand("" + (4 + i));
-			yellowPawn[i].setDisabledIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+			yellowPawn[i].setDisabledIcon(new ImageIcon(imgURL));
 			yellowPawn[i].setMaximumSize(new java.awt.Dimension(35, 35));
 			yellowPawn[i].setMinimumSize(new java.awt.Dimension(35, 35));
 			yellowPawn[i].setPreferredSize(new java.awt.Dimension(35, 35));
@@ -544,15 +551,18 @@ public class SorryGame extends JApplet {
 		yellowHomePane.setBounds(390, 240, 90, 90);
 		gameBoardLayeredPane.add(yellowHomePane, JLayeredPane.MODAL_LAYER);
 				
-		
-		yellowHomeButton = new JButton();
-		yellowHomeButton.setOpaque(false);
-		yellowHomeButton.setMaximumSize(new Dimension(35, 35));
-		yellowHomeButton.setMinimumSize(new Dimension(35, 35));
-		yellowHomeButton.setPreferredSize(new Dimension(35, 35));
-		yellowHomeButton.setActionCommand("" + 67); // track square index
-		yellowHomeButton.addActionListener(new SquareButtonListener());
-		yellowHomeButton.setEnabled(false);
+		for(int i = 0; i < 4; i++) {
+			yellowHomeButtons[i] = new JButton();
+			yellowHomeButtons[i].setOpaque(false);
+			yellowHomeButtons[i].setMaximumSize(new Dimension(35, 35));
+			yellowHomeButtons[i].setMinimumSize(new Dimension(35, 35));
+			yellowHomeButtons[i].setPreferredSize(new Dimension(35, 35));
+			yellowHomeButtons[i].setActionCommand("" + 67); // track square index
+			yellowHomeButtons[i].addActionListener(new SquareButtonListener());
+			imgURL = SorryGame.class.getResource("squareButton.jpg");
+			yellowHomeButtons[i].setIcon(new ImageIcon(imgURL));
+			yellowHomeButtons[i].setEnabled(false);
+		}
 		/***************************************************************************************/
 
 		// set up the safety zone panel for the yellow player
@@ -607,7 +617,8 @@ public class SorryGame extends JApplet {
 		drawCardPane.setOpaque(false);
 		gameBoardLayeredPane.add(drawCardPane, JLayeredPane.MODAL_LAYER);
 		// create the drawCardBtn for drawing a card
-		drawCardBtn.setIcon(new ImageIcon("C:/Users/xsong/Sorry/drawACard.jpg"));
+		imgURL = SorryGame.class.getResource("drawACard.jpg");
+		drawCardBtn.setIcon(new ImageIcon(imgURL));
 		drawCardBtn.setToolTipText("Click to draw a card.");
 		drawCardBtn.setHorizontalTextPosition(SwingConstants.CENTER);
 		drawCardBtn.setMaximumSize(new Dimension(90, 125));
@@ -703,8 +714,8 @@ public class SorryGame extends JApplet {
 							.removeAll();
 					transparentSquarePane[outerTrackPaneIndex[squareIndexArray[i]]]
 							.add(outerTrackButtons[squareIndexArray[i]]);
-					outerTrackButtons[squareIndexArray[i]].setIcon(new ImageIcon(
-							"C:/Users/xsong/Sorry/bumpButton.jpg"));
+					imgURL = SorryGame.class.getResource("bumpButton.jpg");
+					outerTrackButtons[squareIndexArray[i]].setIcon(new ImageIcon(imgURL));
 					outerTrackButtons[squareIndexArray[i]].setEnabled(true);
 					outerTrackButtons[squareIndexArray[i]].setOpaque(true);
 					outerTrackButtons[squareIndexArray[i]]
@@ -713,8 +724,8 @@ public class SorryGame extends JApplet {
 				else {
 					transparentSquarePane[outerTrackPaneIndex[squareIndexArray[i]]]
 							.add(outerTrackButtons[squareIndexArray[i]]);
-					outerTrackButtons[squareIndexArray[i]].setIcon(new ImageIcon(
-							"C:/Users/xsong/Sorry/squareButton.jpg"));
+					imgURL = SorryGame.class.getResource("squareButton.jpg");
+					outerTrackButtons[squareIndexArray[i]].setIcon(new ImageIcon(imgURL));
 					outerTrackButtons[squareIndexArray[i]].setEnabled(true);
 					outerTrackButtons[squareIndexArray[i]].setOpaque(true);
 					outerTrackButtons[squareIndexArray[i]]
@@ -723,8 +734,9 @@ public class SorryGame extends JApplet {
 			}
 			// when the squares are on the yellow safety zone
 			else if (squareIndexArray[i] >= 62 && squareIndexArray[i] < 67) {
+				imgURL = SorryGame.class.getResource("squareButton.jpg");
 				yellowSafetyZoneButtons[squareIndexArray[i] - 62]
-						.setIcon(new ImageIcon("C:/Users/xsong/Sorry/squareButton.jpg"));
+						.setIcon(new ImageIcon(imgURL));
 				yellowSafetyZoneButtons[squareIndexArray[i] - 62]
 						.setEnabled(true);
 				yellowSafetyZoneButtons[squareIndexArray[i] - 62]
@@ -732,14 +744,30 @@ public class SorryGame extends JApplet {
 			}
 			// when the squares are on the yellow Home
 			else if (squareIndexArray[i] == 67) {
-				yellowHomeButton.setIcon(new ImageIcon("C:/Users/xsong/Sorry/squareButton.jpg"));
-				yellowHomeButton.setEnabled(true);
-				yellowHomeButton.setOpaque(true);
-				yellowHomeButton
-						.setToolTipText("Click the squre to move pawn home");
-				yellowHomePane.add(yellowHomeButton);
-				if(SorryGame.debug)
-					System.out.println("the yellow home square is light up");
+				if (i == 0 ) {
+					yellowHomeButtons[currentPawnIndex-4].setEnabled(true);
+					yellowHomeButtons[currentPawnIndex-4].setOpaque(true);
+					yellowHomeButtons[currentPawnIndex-4]
+							.setToolTipText("Click the squre to move pawn home");
+					yellowHomePane.add(yellowHomeButtons[currentPawnIndex-4]);
+					if(SorryGame.debug)
+						System.out.println("the yellow home square is light up, ==0. yellowHomeButtons"
+					+(currentPawnIndex-4)+"  is added to the homepane");
+				}
+				else if(i>0 && squareIndexArray[i-1] != squareIndexArray[i]) {
+					yellowHomeButtons[currentPawnIndex-4].setEnabled(true);
+					yellowHomeButtons[currentPawnIndex-4].setOpaque(true);
+					yellowHomeButtons[currentPawnIndex-4]
+							.setToolTipText("Click the squre to move pawn home");
+					yellowHomePane.add(yellowHomeButtons[currentPawnIndex-4]);
+					if(SorryGame.debug)
+						System.out.println("the yellow home square is light up, >0");
+				}
+				else {
+					
+					if(SorryGame.debug)
+						System.out.println("the yellow home square is not light up, else");
+				}
 			}
 			// only the squares accessible to the yellow pawns can be lighted up
 			// all the other squares are not allowed (should be handled by the
@@ -810,7 +838,8 @@ public class SorryGame extends JApplet {
 
 			/************ move the red pawn to the destination square ************/			
 			// change the selected pawn (grey) back to red color
-			redPawn[pawnNum].setIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg"));
+			imgURL = SorryGame.class.getResource("redPawn.jpg");
+			redPawn[pawnNum].setIcon(new ImageIcon(imgURL));
 
 			// move the pawn to a square on the outer track
 			if (destinationSquareIndex >= 0 && destinationSquareIndex < 56) {
@@ -913,7 +942,8 @@ public class SorryGame extends JApplet {
 
 			/************ move the yellow pawn to the destination square ************/
 			// change the selected pawn (grey) back to yellow color
-			yellowPawn[pawnNum - 4].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+			imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+			yellowPawn[pawnNum - 4].setIcon(new ImageIcon(imgURL));
 
 			// move the pawn to a square on the outer track
 			if (destinationSquareIndex >= 0 && destinationSquareIndex < 56) {
@@ -943,9 +973,8 @@ public class SorryGame extends JApplet {
 			}
 			// move yellow pawn to its home
 			else if (destinationSquareIndex == 67) {
-				yellowHomePane.remove(yellowHomeButton);
-				yellowHomeButton.setIcon(null);
-				yellowHomeButton.setEnabled(false);
+				yellowHomePane.remove(yellowHomeButtons[pawnNum-4]);
+				yellowHomeButtons[pawnNum-4].setEnabled(false);
 				yellowHomePane.add(yellowPawn[pawnNum - 4]);
 				yellowPawn[pawnNum - 4].setEnabled(false);
 				successfulMove = true;
@@ -1044,20 +1073,25 @@ public class SorryGame extends JApplet {
 		
 		// a red pawn is selected by the computer, but should not by the user
 		if (pawnNum >= 0 && pawnNum < 4) {
-			redPawn[pawnNum].setIcon(new ImageIcon("C:/Users/xsong/Sorry/selectedPawn.jpg"));
+			imgURL = SorryGame.class.getResource("selectedPawn.jpg");
+			redPawn[pawnNum].setIcon(new ImageIcon(imgURL));
 			for (int i = 0; i < 4; i++) {
-				if (i != pawnNum)
-					redPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg"));
+				if (i != pawnNum) {
+					imgURL = SorryGame.class.getResource("redPawn.jpg");
+					redPawn[i].setIcon(new ImageIcon(imgURL));
+				}
 			}
 			pawnSelected = true;
 			currentPawnIndex = pawnNum;
 		}
 		// a yellow pawn is selected by the user
 		else if (pawnNum >= 4 && pawnNum < 8) {
-			yellowPawn[pawnNum - 4].setIcon(new ImageIcon("C:/Users/xsong/Sorry/selectedPawn.jpg"));
+			imgURL = SorryGame.class.getResource("selectedPawn.jpg");
+			yellowPawn[pawnNum - 4].setIcon(new ImageIcon(imgURL));
 			for (int i = 0; i < 4; i++) {
 				if (i != (pawnNum - 4)) {
-					yellowPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+					imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+					yellowPawn[i].setIcon(new ImageIcon(imgURL));
 					yellowPawn[i].setEnabled(false);
 				}
 			}
@@ -1068,7 +1102,8 @@ public class SorryGame extends JApplet {
 			pawnSelected = false;
 			currentPawnIndex = -1;
 			for (int i = 0; i < 4; i++) {
-				yellowPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+				imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+				yellowPawn[i].setIcon(new ImageIcon(imgURL));
 			}
 		}
 		
@@ -1096,7 +1131,7 @@ public class SorryGame extends JApplet {
 			
 			if ( Arrays.asList(outerTrackButtons).contains(e.getSource()) || 
 					Arrays.asList(yellowSafetyZoneButtons).contains(e.getSource()) ||
-					e.getSource() == yellowHomeButton) {
+					Arrays.asList(yellowHomeButtons).contains(e.getSource())) {
 				selectSquare(Integer.parseInt(e.getActionCommand()));
 			}
 			else {
@@ -1170,9 +1205,9 @@ public class SorryGame extends JApplet {
 			if (option == JOptionPane.YES_OPTION) {
 
 				JOptionPane.showMessageDialog(null, "Games played: #\nGames won: #\nWin percentage: #%\nEverage duration: #", "Statistics",  JOptionPane.INFORMATION_MESSAGE);
-				endGame();
+				System.exit(0);
 			} else if (option == JOptionPane.NO_OPTION) {
-				endGame();
+				System.exit(0);
 			}
 		}
 	}// end of quitBtnActionPerformed() handler
@@ -1294,7 +1329,8 @@ public class SorryGame extends JApplet {
 	 */
 	public void displayCard(String cardImage) {
 		displayCardLabel.setVisible(true);
-		displayCardLabel.setIcon(new ImageIcon("C:/Users/xsong/Sorry/" + cardImage));
+		imgURL = SorryGame.class.getResource(cardImage);
+		displayCardLabel.setIcon(new ImageIcon(imgURL));
 		repaint();
 		//revalidate();
 	}// end of displayCard()
@@ -1312,7 +1348,8 @@ public class SorryGame extends JApplet {
 	public void setYellowPawnEnabled(boolean b) {
 		if (b) {
 			for (int i = 0; i < 4; i++) {
-				yellowPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+				imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+				yellowPawn[i].setIcon(new ImageIcon(imgURL));
 				if (!board.pawns[i+4].isOnHome()) {
 					if (currentCard.getcardNum() != 0 && currentCard.getcardNum() != 1 && currentCard.getcardNum() != 2) {
 						if(board.pawns[i+4].getTrackIndex() == -1)
@@ -1352,7 +1389,8 @@ public class SorryGame extends JApplet {
 		}
 		else {
 			for (int i = 0; i < 4; i++) {
-				yellowPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg"));
+				imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+				yellowPawn[i].setIcon(new ImageIcon(imgURL));
 				yellowPawn[i].setEnabled(false);
 				yellowPawn[i].setToolTipText(null);
 			}
@@ -1374,7 +1412,11 @@ public class SorryGame extends JApplet {
 			yellowSafetyZoneButtons[i].setEnabled(false);
 			yellowSafetyZoneButtons[i].setOpaque(false);
 		}
-		yellowHomePane.remove(yellowHomeButton);
+		for(int i = 0; i<4; i++) {
+			//if (currentPawnIndex >= 4)
+				//yellowHomePane.remove(yellowHomeButtons[currentPawnIndex-4]);
+		}
+		
 		repaint();
 		//revalidate();
 	}
@@ -1504,7 +1546,20 @@ public class SorryGame extends JApplet {
 			}
 		}
 		if(currentPawnIndex == -1) {
-			return true;
+			if (currentCard.getcardNum() == 1 || currentCard.getcardNum() == 2 ) {
+				for (int i = 0; i < 4; i++) {
+					if (board.pawns[i].getTrackIndex() == -1) {
+						currentPawnIndex = i;
+						break;
+					}
+				}
+				if (currentPawnIndex == -1) {
+					return true;
+				}
+			}
+			else {
+				return true;
+			}
 		}
 		//change the selected pawn to grey
 		selectPawn(currentPawnIndex);
@@ -1522,6 +1577,9 @@ public class SorryGame extends JApplet {
 
 		//find destination for the red pawn
 		int[] redPawnPossibleMoves = board.findMoves(board.pawns[currentPawnIndex], currentCard);
+		if(redPawnPossibleMoves.length == 0) {
+			return true;
+		}
 		int destination, distanceToHome = redPawnPossibleMoves[0];
 		for (int i = 1; i<redPawnPossibleMoves.length;i++) {
 			if(distanceToHome > (61 - redPawnPossibleMoves[i]))
@@ -1538,17 +1596,16 @@ public class SorryGame extends JApplet {
 				System.out.println("previousYellowPawnSquareIndex["+i+"] = "+previousYellowPawnSquareIndex[i]);
 		}
 		//move the red pawn in gameBoard, might bump or switch place with a yellow pawn
-		if (SorryGame.debug)
+		// (SorryGame.debug)
 			numMoves = board.movePawnTo(board.pawns[currentPawnIndex], destination);
 		//computer.computerPlay(board, currentCard);
 		
 		//if a yellow pawn is bumped
 		for (int i = 0; i < 4; i++) {
-
 			if(SorryGame.debug){
 				System.out.println("board.pawns["+(i+4)+"].getTrackIndex() = "+board.pawns[i+4].getTrackIndex());
 			}
-			if (board.pawns[i+4].getTrackIndex() != previousYellowPawnSquareIndex[i]) {
+			if (destination == previousYellowPawnSquareIndex[i])
 				//if the red pawn is switched place with a yellow pawn
 				if(currentCard.getcardNum() == 11) {
 					if(SorryGame.debug)
@@ -1570,6 +1627,7 @@ public class SorryGame extends JApplet {
 					//add the yellow pawn to where the red pawn was
 					movePawn((i+4), -2, previousSquareIndex);
 
+
 					if(board.hasWon(COMPUTER)) {
 						showCongratulationDialog(COMPUTER);
 						isWinner = COMPUTER;
@@ -1582,9 +1640,10 @@ public class SorryGame extends JApplet {
 						System.out.println("I'm gonna bump a yellow pawn to start");
 					//move the yellow pawn to destination (start)				
 					movePawn((i+4), previousYellowPawnSquareIndex[i], -1);
+
 					//move the red pawn to destination
 					movePawn(currentPawnIndex, previousSquareIndex, board.pawns[currentPawnIndex].getTrackIndex());
-					
+
 					if(board.hasWon(COMPUTER)) {
 						showCongratulationDialog(COMPUTER);
 						isWinner = COMPUTER;
@@ -1594,7 +1653,7 @@ public class SorryGame extends JApplet {
 					return true;
 				}
 			}
-		}
+		
 		
 		//move the red pawn to destination without showing the sliding
 		movePawn(currentPawnIndex, previousSquareIndex, board.pawns[currentPawnIndex].getTrackIndex());
@@ -1719,9 +1778,11 @@ public class SorryGame extends JApplet {
 		//find moves for lighting up the squares
 		int[] movesFound = board.findMoves(board.pawns[currentPawnIndex], currentCard);
 		if(SorryGame.debug) {
-			for (int i = 0; i < movesFound.length - 1; i++)
+			for (int i = 0; i < movesFound.length; i++) {
 				System.out.print("found moves: " + movesFound[i] + ", ");
-			System.out.println();
+				System.out.println();
+			}
+			System.out.println("the number of moves found: "+movesFound.length);
 		}
 		
 		//light up the squares found, if no moves were found, user's turn terminates
@@ -1831,16 +1892,14 @@ public class SorryGame extends JApplet {
 		if (successfulMove && currentCard.getcardNum() == 7 && numMoves < 7) {
 			
 			//check if any yellow pawn on track, which is movable
-			boolean isAnyYellowPawnMovable = false;
+			int movablePawnCounter = 0;
 			for (int i = 4; i<8; i++) {
-				if(board.pawns[i].getTrackIndex() != 0 && board.pawns[i].getTrackIndex() != 67) {
-					isAnyYellowPawnMovable = true;
-					break;
-				}
-					
+				if(board.pawns[i].getTrackIndex() != -1 && board.pawns[i].getTrackIndex() != 67) {
+					movablePawnCounter++;
+				}					
 			}
 			//if no movable yellow pawn, user's turn forfeit
-			if (!isAnyYellowPawnMovable)
+			if (movablePawnCounter == 0)
 				return true;
 			
 			//clearTrack();
@@ -1986,7 +2045,8 @@ public class SorryGame extends JApplet {
 		
 		// set up the image for red pawns
 		for (int i = 0; i < 4; i++) {
-			redPawn[i].setIcon(new ImageIcon("C:/Users/xsong/Sorry/redPawn.jpg"));
+			imgURL = SorryGame.class.getResource("redPawn.jpg");
+			redPawn[i].setIcon(new ImageIcon(imgURL));
 		}
 		/***************************************************************************************/
 	
@@ -1998,7 +2058,8 @@ public class SorryGame extends JApplet {
 	
 		// set up the image for yellow pawns
 		for (int i = 0; i < 4; i++) {
-			yellowPawn[i].setIcon(new javax.swing.ImageIcon("C:/Users/xsong/Sorry/yellowPawn.jpg")); // NOI18N
+			imgURL = SorryGame.class.getResource("yellowPawn.jpg");
+			yellowPawn[i].setIcon(new javax.swing.ImageIcon(imgURL)); 
 		}
 		/***************************************************************************************/
 	
