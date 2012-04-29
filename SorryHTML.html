@@ -1,8 +1,35 @@
-<applet code="SorryGame.class"
-	name=SorryGame 
-	archive="SorryGame.jar"
-	width=800 height=600>
-	<param name="bgcolor" value="ffffff">
-	<param name="fontcolor" value="000000">
-	Your browser is not Java enabled.
-</applet>
+
+
+
+<html 
+	lang="en-US">
+  
+<head>
+    
+<title>Sorry Game Page</title>
+    
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  
+</head>
+  
+<body>
+    <h1>Sorry Game</h1>
+    
+    
+<script src="http://www.java.com/js/deployJava.js"></script>
+    
+<script>        
+        
+ var dir = location.href.substring(0,
+            location.href.lastIndexOf('/')+1);
+        var url = dir + "SorryGame.jnlp";
+
+        deployJava.createWebStartLaunchButton(url, '1.6.0');
+    
+</script>
+    
+<noscript>JavaScript is required for this page.</noscript>
+
+  
+</body>
+</html>
